@@ -1,0 +1,1152 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Red-Life Adventures | Retro Hub</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: "Trebuchet MS", Verdana, Arial, sans-serif;
+      background:
+        radial-gradient(circle at top left, #ff7ac4 0, transparent 50%),
+        radial-gradient(circle at bottom right, #5cf2ff 0, transparent 55%),
+        #000020;
+      color: #e6f4ff;
+      min-height: 100vh;
+    }
+
+    a {
+      color: #90ff7a;
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+      color: #fffacd;
+    }
+
+    .page-wrapper {
+      max-width: 1100px;
+      margin: 20px auto 40px;
+      border: 3px solid #ffcc00;
+      background: rgba(10, 10, 40, 0.95);
+      box-shadow: 0 0 25px rgba(0, 0, 0, 0.9);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .sticker {
+      position: absolute;
+      opacity: 0.35;
+      pointer-events: none;
+      filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.6));
+      animation: float 18s linear infinite;
+    }
+
+    .sticker.star1 { top: 60%; left: -80px; animation-delay: 0s; }
+    .sticker.star2 { top: 10%; right: -90px; animation-delay: 4s; }
+    .sticker.star3 { top: 80%; right: -70px; animation-delay: 8s; }
+
+    @keyframes float {
+      0%   { transform: translateX(0) translateY(0) rotate(0deg); }
+      50%  { transform: translateX(-40px) translateY(-30px) rotate(10deg); }
+      100% { transform: translateX(-260px) translateY(-60px) rotate(-15deg); }
+    }
+
+    header {
+      border-bottom: 2px solid #ffcc00;
+      padding: 10px 15px 0;
+      background: linear-gradient(90deg, #ff0084, #3300ff);
+      color: #fff;
+      text-shadow: 2px 2px 0 #000;
+    }
+
+    .header-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .site-title {
+      font-size: 2.3rem;
+      letter-spacing: 1px;
+    }
+
+    .online-status {
+      font-size: 0.9rem;
+      background: #00cc4b;
+      color: #021b06;
+      padding: 3px 8px;
+      border-radius: 999px;
+      border: 2px solid #e6ffe6;
+      box-shadow: 0 0 6px rgba(0, 0, 0, 0.7);
+      animation: pulse 1.6s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); box-shadow: 0 0 4px #e6ffe6; }
+      50%      { transform: scale(1.08); box-shadow: 0 0 10px #e6ffe6; }
+    }
+
+    nav {
+      margin-top: 10px;
+      padding-bottom: 6px;
+      border-top: 2px solid rgba(255, 255, 255, 0.4);
+      border-bottom: 2px solid rgba(255, 255, 255, 0.4);
+      text-align: center;
+      font-size: 0.95rem;
+    }
+
+    nav a {
+      display: inline-block;
+      margin: 4px 12px;
+      padding: 4px 8px;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 4px;
+      border: 1px solid rgba(255, 255, 255, 0.4);
+    }
+
+    nav a:hover {
+      background: rgba(0, 0, 0, 0.65);
+    }
+
+    .marquee-wrapper {
+      background: #000010;
+      border-top: 2px dashed #ffcc00;
+      border-bottom: 2px dashed #ffcc00;
+      padding: 4px 0;
+      font-size: 0.9rem;
+      color: #fffdc2;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      gap: 10px;
+      padding: 15px;
+    }
+
+    @media (max-width: 800px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .panel {
+      background: #101034;
+      border: 2px solid #ffcc00;
+      margin-bottom: 12px;
+      padding: 10px;
+      box-shadow: 2px 2px 0 #000;
+    }
+
+    .panel h2 {
+      font-size: 1.1rem;
+      margin-bottom: 6px;
+      color: #fffdc2;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .profile-pic {
+      width: 100%;
+      aspect-ratio: 4 / 5;
+      object-fit: cover;
+      border: 3px double #ffcc00;
+      margin-bottom: 6px;
+      background: #000;
+    }
+
+    .profile-name {
+      font-weight: bold;
+      font-size: 1.05rem;
+      margin-bottom: 4px;
+    }
+
+    .profile-meta {
+      font-size: 0.85rem;
+      line-height: 1.4;
+    }
+
+    .status-box {
+      background: #000015;
+      border: 1px solid #ff88ff;
+      padding: 6px;
+      font-size: 0.85rem;
+      margin-top: 5px;
+    }
+
+    .status-label {
+      font-weight: bold;
+      color: #ff88ff;
+    }
+
+    .contact-list {
+      list-style: none;
+      font-size: 0.85rem;
+      line-height: 1.6;
+    }
+
+    .content-panel {
+      background: #050518;
+      border: 2px solid #ffcc00;
+      padding: 12px;
+      margin-bottom: 12px;
+      box-shadow: 2px 2px 0 #000;
+    }
+
+    .content-panel h2 {
+      font-size: 1.2rem;
+      margin-bottom: 8px;
+      color: #fffdc2;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.25);
+    }
+
+    .content-panel p {
+      font-size: 0.95rem;
+      line-height: 1.5;
+      margin-bottom: 8px;
+    }
+
+    .shop-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+      gap: 10px;
+      margin-top: 6px;
+    }
+
+    .shop-card {
+      background: linear-gradient(145deg, #1b1b3f, #00001a);
+      border: 1px solid #ff88ff;
+      padding: 8px;
+      font-size: 0.9rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .shop-card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(120deg, transparent, rgba(255, 255, 255, 0.15), transparent);
+      transform: translateX(-100%);
+      animation: sheen 4s linear infinite;
+    }
+
+    @keyframes sheen {
+      0%   { transform: translateX(-100%); }
+      60%  { transform: translateX(120%); }
+      100% { transform: translateX(120%); }
+    }
+
+    .shop-card h3 {
+      font-size: 1rem;
+      margin-bottom: 4px;
+      color: #fffdc2;
+    }
+
+    .shop-card p {
+      font-size: 0.85rem;
+      margin-bottom: 4px;
+    }
+
+    .now-playing {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.85rem;
+      margin-top: 4px;
+    }
+
+    .equalizer {
+      display: inline-flex;
+      gap: 2px;
+      align-items: flex-end;
+      height: 12px;
+    }
+
+    .bar {
+      width: 3px;
+      background: #90ff7a;
+      animation: bounce 0.8s infinite alternate;
+    }
+
+    .bar:nth-child(2) { animation-delay: 0.2s; }
+    .bar:nth-child(3) { animation-delay: 0.4s; }
+    .bar:nth-child(4) { animation-delay: 0.6s; }
+
+    @keyframes bounce {
+      0%   { height: 3px; }
+      100% { height: 12px; }
+    }
+
+    .rotator-frame {
+      margin-top: 8px;
+      border: 2px solid #ff88ff;
+      background: #000012;
+      padding: 4px;
+    }
+
+    .rotator-frame img {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    .random-gif {
+      display: block;
+      margin: 8px auto 2px;
+      max-width: 180px;
+      border: 2px solid #ffcc00;
+      background: #000;
+    }
+
+    .gif-caption {
+      font-size: 0.8rem;
+      text-align: center;
+      opacity: 0.8;
+    }
+
+    .latest-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 8px;
+      margin-top: 6px;
+      font-size: 0.85rem;
+    }
+
+    .latest-card {
+      border: 1px solid #ff88ff;
+      background: #080822;
+      padding: 6px;
+    }
+
+    .latest-card strong {
+      display: block;
+      margin-bottom: 3px;
+      color: #fffdc2;
+    }
+
+    .latest-thumb {
+      width: 100%;
+      height: 120px;
+      object-fit: cover;
+      margin-bottom: 4px;
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      background: #000;
+    }
+
+    .status-metrics {
+      font-size: 0.8rem;
+      margin-top: 6px;
+      background: #000015;
+      border: 1px solid #00eaff;
+      padding: 6px;
+      font-family: "Consolas", "Courier New", monospace;
+    }
+
+    .visit-counter {
+      font-family: "Consolas", "Courier New", monospace;
+      font-size: 1rem;
+      padding: 4px 0;
+    }
+
+    .visit-counter.sparkle {
+      animation: sparkle 0.8s ease-out;
+    }
+
+    @keyframes sparkle {
+      0%   { text-shadow: 0 0 0px #fff; transform: scale(1); }
+      50%  { text-shadow: 0 0 14px #fff; transform: scale(1.25); }
+      100% { text-shadow: 0 0 0px #fff; transform: scale(1); }
+    }
+
+    /* 2x2 info tiles */
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 8px;
+    }
+
+    @media (max-width: 800px) {
+      .info-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .info-tile {
+      background: #050518;
+      border: 2px solid #ffcc00;
+      padding: 10px;
+      box-shadow: 2px 2px 0 #000;
+    }
+
+    .info-tile h3 {
+      font-size: 1rem;
+      margin-bottom: 6px;
+      color: #fffdc2;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.25);
+    }
+
+    footer {
+      text-align: center;
+      padding: 8px;
+      font-size: 0.8rem;
+      color: #d4e6ff;
+      background: #000010;
+      border-top: 2px solid #ffcc00;
+    }
+
+    footer a {
+      color: #ff88ff;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="page-wrapper">
+    <!-- Floating stickers -->
+    <img class="sticker star1" src="images/glitter-star.gif" alt="sparkle">
+    <img class="sticker star2" src="images/d20.gif" alt="d20">
+    <img class="sticker star3" src="images/controller.gif" alt="controller">
+
+    <header>
+      <div class="header-top">
+        <div>
+          <div class="site-title">Red-Life Adventures</div>
+          <div style="font-size:0.9rem;">Games, dice, dioramas and mildly obsessive side projects</div>
+        </div>
+        <div class="online-status">Dean is online</div>
+      </div>
+
+      <nav>
+        <a href="#about">About Me</a>
+        <a href="#shops">Shops</a>
+        <a href="#latest">Latest stuff</a>
+        <a href="#signals">Signals</a>
+        <a href="#contact">Contact</a>
+      </nav>
+    </header>
+
+    <div class="marquee-wrapper">
+      <marquee behavior="scroll" direction="left" scrollamount="4">
+        Welcome to my tiny corner of the internet. Featuring D and D nonsense, crunchy spreadsheets, terrain builds and far too many unfinished ideas.
+      </marquee>
+    </div>
+
+    <main class="layout">
+      <!-- Left column -->
+      <section>
+        <div class="panel">
+          <h2>Profile</h2>
+
+          <img class="profile-pic" src="images/profile.jpg" alt="Dean profile">
+
+          <div class="profile-name">Dean / Red-Life Adventures</div>
+          <div class="profile-meta">
+            Location: Edinburgh, Scotland<br>
+            Occupation: Managing books by day, making games and terrain at night<br>
+            Status: Trying not to start another project
+          </div>
+
+          <div class="status-box">
+            <div class="status-label">Current Status:</div>
+            <div id="status-text">
+              Loading creative chaos...
+            </div>
+          </div>
+
+          <div class="now-playing">
+            <div class="equalizer" aria-hidden="true">
+              <div class="bar"></div>
+              <div class="bar"></div>
+              <div class="bar"></div>
+              <div class="bar"></div>
+            </div>
+            <span>Now playing: background podcast about dice probabilities</span>
+          </div>
+
+          <div class="rotator-frame">
+            <img id="photo-rotator" src="images/gallery1.jpg" alt="Workshop photo">
+          </div>
+        </div>
+
+        <div class="panel" id="contact">
+          <h2>Contact</h2>
+          <ul class="contact-list">
+            <li><strong>Email:</strong> <a href="mailto:you@red-life-adventures.co.uk">you@red-life-adventures.co.uk</a></li>
+            <li><strong>Instagram DMs:</strong> <a href="https://www.instagram.com/boldrabble/" target="_blank" rel="noopener">BoldRabble</a></li>
+            <li><strong>Preferred topics:</strong> D and D, terrain, spreadsheets, weird ideas</li>
+          </ul>
+
+          <div class="status-metrics">
+            <div>sys.uptime: <span id="uptime-value">0000s</span></div>
+            <div>sys.ping: <span id="ping-value">42</span> ms</div>
+            <div>sys.mood: <span id="mood-value">OK</span></div>
+            <div>uplink.latency: <span id="ping-readout">measuring...</span></div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h2>Visitor Counter</h2>
+          <div id="visit-counter" class="visit-counter">Loading...</div>
+        </div>
+
+        <div class="panel">
+          <h2>Your approximate location</h2>
+          <div id="geo-info">
+            Looking up a rough location. This is based on IP only and not exact.
+          </div>
+        </div>
+
+        <div class="panel">
+          <h2>Friends and Links</h2>
+          <p style="font-size:0.85rem; margin-bottom:4px;">
+            Coming soon: collaborator list, cool makers and creators who inspire me.
+          </p>
+          <p style="font-size:0.8rem; opacity:0.8;">
+            If we have worked together and you want a link here, give me a nudge.
+          </p>
+        </div>
+      </section>
+
+      <!-- Right column -->
+      <section>
+        <div class="content-panel" id="about">
+          <h2>About Me</h2>
+          <p>
+            I am Dean, the person behind Red-Life Adventures and BoldRabble. I split my time between books, tabletop games, terrain building and digital side projects. Most of what I make starts as an experiment and occasionally escapes into the world as something people can actually use.
+          </p>
+          <p>
+            This site is a simple hub that pulls my different projects into one place: print on demand designs, 3D printable tools for D and D, RPG supplements and the workshop builds that show up on Instagram. Expect a mix of useful things, half formed ideas and the occasional glitch.
+          </p>
+
+          <img id="random-gif" class="random-gif" src="images/placeholder.gif" alt="Random gif">
+          <div class="gif-caption">Reload to see what the system spits out next.</div>
+        </div>
+
+        <div class="content-panel" id="shops">
+          <h2>Shops and Projects</h2>
+          <p>
+            Here is where you can actually get hold of the things I make.
+          </p>
+
+          <div class="shop-grid">
+            <article class="shop-card">
+              <h3>Redbubble Store</h3>
+              <p>Spreadsheet jokes, retro pixels and other nerdy designs on mugs, shirts and more.</p>
+              <p><a href="https://www.redbubble.com/people/imthebus/shop" target="_blank" rel="noopener">Visit Redbubble shop</a></p>
+            </article>
+
+            <article class="shop-card">
+              <h3>Etsy 3D Prints</h3>
+              <p>Spell slot trackers, counters and 3D printable tools for tabletop games.</p>
+              <p><a href="https://www.etsy.com/shop/RedLife3D" target="_blank" rel="noopener">Visit Etsy shop</a></p>
+            </article>
+
+            <article class="shop-card">
+              <h3>DriveThruRPG Titles</h3>
+              <p>Adventures, tables and supplements under the Red-Life Adventures banner.</p>
+              <p><a href="https://www.drivethrurpg.com/" target="_blank" rel="noopener">Find me on DriveThruRPG</a></p>
+            </article>
+
+            <article class="shop-card">
+              <h3>BoldRabble on Instagram</h3>
+              <p>Diorama builds, resin experiments and behind the scenes workshop chaos.</p>
+              <p><a href="https://www.instagram.com/boldrabble/" target="_blank" rel="noopener">Watch the reels</a></p>
+            </article>
+
+            <article class="shop-card">
+              <h3>ImTheBus Tools</h3>
+              <p>Management and leadership web tools and experiments.</p>
+              <p><a href="https://imthebus.co.uk" target="_blank" rel="noopener">Visit imthebus.co.uk</a></p>
+            </article>
+          </div>
+        </div>
+
+        <div class="content-panel" id="latest">
+          <h2>Latest stuff</h2>
+          <p style="font-size:0.9rem;">
+            Manual hub of what I have put out recently. Quick way to see where new things landed.
+          </p>
+          <div class="latest-grid">
+            <div class="latest-card">
+              <img class="latest-thumb" src="images/latest-instagram.jpg" alt="Latest Instagram">
+              <strong>New reel on BoldRabble</strong>
+              <span>Terrain build timelapse and resin experiments.</span><br>
+              <a href="https://www.instagram.com/boldrabble/" target="_blank" rel="noopener">Open on Instagram</a>
+            </div>
+            <div class="latest-card">
+              <img class="latest-thumb" src="images/latest-drivethru.jpg" alt="Latest RPG title">
+              <strong>New title on DriveThruRPG</strong>
+              <span>Fresh table, adventure or tool from Red-Life Adventures.</span><br>
+              <a href="https://www.drivethrurpg.com/" target="_blank" rel="noopener">View on DriveThruRPG</a>
+            </div>
+            <div class="latest-card">
+              <img class="latest-thumb" src="images/latest-imthebus.jpg" alt="Latest tool">
+              <strong>Updated ImTheBus Tool</strong>
+              <span>Latest tweak or new experiment in the management toolset.</span><br>
+              <a href="https://imthebus.co.uk" target="_blank" rel="noopener">Open tool hub</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2x2 info tiles -->
+        <div class="content-panel" id="signals">
+          <h2>Signals from the multiverse</h2>
+
+          <div class="info-grid">
+            <!-- Calendar tile -->
+            <section class="info-tile" id="calendar">
+              <h3>Today in the calendar</h3>
+              <div id="holiday-status">Checking holidays...</div>
+            </section>
+
+            <!-- Potter lore tile -->
+            <section class="info-tile" id="magic">
+              <h3>Random Potter lore</h3>
+              <div id="potter-fact">Summoning magical trivia...</div>
+            </section>
+
+            <!-- Bored API tile -->
+            <section class="info-tile">
+              <h3>Something to do</h3>
+
+              <div style="font-size:0.8rem; margin-bottom:6px;">
+                Tune the vibe, then hit the button.
+              </div>
+
+              <div style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:6px;">
+                <select id="bored-type" style="flex:1; min-width:140px;">
+                  <option value="">Any type</option>
+                  <option value="education">Education</option>
+                  <option value="recreational">Recreational</option>
+                  <option value="social">Social</option>
+                  <option value="charity">Charity</option>
+                  <option value="cooking">Cooking</option>
+                  <option value="relaxation">Relaxation</option>
+                  <option value="busywork">Busywork</option>
+                </select>
+
+                <select id="bored-participants" style="width:110px;">
+                  <option value="">Any #</option>
+                  <option value="1">Solo</option>
+                  <option value="2">2</option>
+                  <option value="3">3</option>
+                  <option value="4">4</option>
+                  <option value="5">5</option>
+                  <option value="6">6</option>
+                  <option value="8">8</option>
+                </select>
+              </div>
+
+              <button id="bored-button" type="button" style="
+                  font-size:0.85rem;
+                  padding:4px 10px;
+                  margin-bottom:6px;
+                  border:1px solid #ffcc00;
+                  background:#000018;
+                  color:#e6f4ff;
+                  cursor:pointer;
+                ">
+                Roll an activity
+              </button>
+
+              <div id="bored-activity">Finding you a distraction...</div>
+            </section>
+
+            <!-- QR tile -->
+            <section class="info-tile">
+              <h3>Scan to visit later</h3>
+              <p style="font-size:0.9rem; margin-bottom:6px;">
+                Point a camera at this and keep the portal handy.
+              </p>
+              <img id="site-qr" alt="QR code for this site">
+            </section>
+          </div>
+        </div>
+
+        <div class="content-panel" id="gallery">
+          <h2>Projects and experiments</h2>
+          <p>
+            Highlights from ongoing and recent projects:
+          </p>
+          <ul style="margin-left:18px; font-size:0.95rem; line-height:1.5;">
+            <li>3D printed spell slot trackers for 5e spellcasters.</li>
+            <li>Diorama builds with foam, resin and texture paste.</li>
+            <li>RPG supplements like tavern and temple rumor tables.</li>
+            <li>Digital tools and dashboards to help organise campaigns and projects.</li>
+          </ul>
+          <p style="margin-top:6px; font-size:0.85rem; opacity:0.85;">
+            At some point this section will become a proper gallery. For now, follow the links above to see what is actually live.
+          </p>
+        </div>
+
+        <div class="content-panel">
+          <h2>Guestbook</h2>
+          <p style="font-size:0.9rem; margin-bottom:6px;">
+            True to old internet tradition, this is where a guestbook will go.
+          </p>
+          <p style="font-size:0.85rem; opacity:0.8;">
+            Until then, feel free to say hi through Instagram or email instead of trying to remember your old Myspace login details.
+          </p>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <div>Red-Life Adventures &copy; <span id="year"></span>. Powered by caffeine, polyhedral dice and nostalgia.</div>
+      <div>Site look intentionally retro. If something flickers, that just means it is authentic.</div>
+    </footer>
+  </div>
+
+  <script>
+    function randomFrom(list) {
+      return list[Math.floor(Math.random() * list.length)];
+    }
+
+    // Animated status text
+    const statuses = [
+      "Painting tiny rocks and pretending it is productive.",
+      "Writing encounter tables instead of finishing campaigns.",
+      "Balancing D20s, budgets and brush strokes.",
+      "Probably thinking about how to make this terrain modular.",
+      "Trying to convince myself I do not need another 3D printer."
+    ];
+
+    function setStatus() {
+      const el = document.getElementById("status-text");
+      if (!el) return;
+      const pick = randomFrom(statuses);
+      el.textContent = pick;
+    }
+
+    // Rotating photos
+    const photos = [
+      "images/gallery1.jpg",
+      "images/gallery2.jpg",
+      "images/gallery3.jpg"
+    ];
+
+    function setRandomPhoto() {
+      const photoEl = document.getElementById("photo-rotator");
+      if (!photoEl) return;
+      const pick = randomFrom(photos);
+      photoEl.src = pick;
+    }
+
+    // Random cat gif from CATAAS
+    function loadRandomGif() {
+      const gifEl = document.getElementById("random-gif");
+      if (!gifEl) return;
+
+      const gifUrls = [
+        "https://cataas.com/cat/gif",
+        "https://cataas.com/cat/cute",
+        "https://cataas.com/cat/funny",
+        "https://cataas.com/cat/gif?type=or",
+        "https://cataas.com/cat/gif/sleepy",
+        "https://cataas.com/cat/gif/play"
+      ];
+
+      const base = randomFrom(gifUrls);
+      const urlWithTs = base + (base.includes("?") ? "&" : "?") + "ts=" + Date.now();
+      gifEl.src = urlWithTs;
+    }
+
+    // Fake system metrics
+    function startSystemMetrics() {
+      const pingEl = document.getElementById("ping-value");
+      const uptimeEl = document.getElementById("uptime-value");
+      const moodEl = document.getElementById("mood-value");
+      if (!pingEl || !uptimeEl || !moodEl) return;
+
+      let uptime = 0;
+      const moods = ["OK", "OK", "OK", "IDLE", "BUILDING", "LOADING"];
+
+      function updateMetrics() {
+        uptime += Math.floor(Math.random() * 4) + 1;
+        uptimeEl.textContent = String(uptime).padStart(4, "0") + "s";
+
+        const ping = 15 + Math.floor(Math.random() * 80);
+        pingEl.textContent = ping;
+
+        const moodPick = moods[Math.floor(Math.random() * moods.length)];
+        moodEl.textContent = moodPick;
+      }
+
+      updateMetrics();
+      setInterval(updateMetrics, 3000);
+    }
+
+    // Real ping
+    async function measurePing() {
+      const el = document.getElementById("ping-readout");
+      if (!el) return;
+
+      const url = "favicon.ico";
+      const start = performance.now();
+      try {
+        await fetch(url, { method: "HEAD", cache: "no-store" });
+        const ms = Math.round(performance.now() - start);
+        el.textContent = "~" + ms + " ms";
+      } catch (err) {
+        const ms = Math.round(performance.now() - start);
+        el.textContent = "~" + ms + " ms (estimated)";
+      }
+    }
+
+    // Next public holiday worldwide using Nager.Date
+    async function loadHoliday() {
+      const el = document.getElementById("holiday-status");
+      if (!el) return;
+
+      const base = "https://date.nager.at/api/v3";
+
+      try {
+        const resp = await fetch(base + "/NextPublicHolidaysWorldwide");
+        if (!resp.ok) throw new Error("Holiday API error");
+        const list = await resp.json();
+
+        if (!Array.isArray(list) || !list.length) {
+          el.textContent = "No holiday information available right now.";
+          return;
+        }
+
+        const todayStr = new Date().toISOString().slice(0, 10);
+
+        const next = list.reduce((best, h) => {
+          if (h.date < todayStr) return best;
+          if (!best) return h;
+          return h.date < best.date ? h : best;
+        }, null);
+
+        if (!next) {
+          el.textContent = "No upcoming holidays found.";
+          return;
+        }
+
+        el.textContent =
+          "Next public holiday anywhere: " +
+          next.localName +
+          " (" +
+          next.name +
+          ") in " +
+          next.countryCode +
+          " on " +
+          next.date +
+          ".";
+      } catch (err) {
+        console.error("Holiday error", err);
+        el.textContent = "Holiday service unavailable.";
+      }
+    }
+
+    // PotterDB fact with richer output
+    async function loadPotterFact() {
+      const el = document.getElementById("potter-fact");
+      if (!el) return;
+
+      const resources = [
+        { type: "spells", label: "Spell" },
+        { type: "characters", label: "Character" },
+        { type: "potions", label: "Potion" }
+      ];
+      const pick = randomFrom(resources);
+      const pageSize = 1;
+      const randomPage = Math.floor(Math.random() * 50) + 1;
+
+      const url =
+        "https://api.potterdb.com/v1/" +
+        pick.type +
+        "?page[size]=" +
+        pageSize +
+        "&page[number]=" +
+        randomPage;
+
+      try {
+        const resp = await fetch(url);
+        if (!resp.ok) throw new Error("PotterDB error");
+        const data = await resp.json();
+        const item = data.data && data.data[0];
+        if (!item) throw new Error("No Potter data");
+
+        const a = item.attributes || {};
+
+        let html =
+          "<strong>" +
+          pick.label +
+          ":</strong> " +
+          (a.name || a.slug || "(no name)");
+
+        const bits = [];
+
+        if (pick.type === "spells") {
+          if (a.incantation) bits.push("Incantation: " + a.incantation);
+          if (a.category) bits.push("Category: " + a.category);
+          if (a.effect) bits.push("Effect: " + a.effect);
+        } else if (pick.type === "characters") {
+          if (a.house) bits.push("House: " + a.house);
+          if (a.blood_status) bits.push("Blood status: " + a.blood_status);
+          if (a.nationality) bits.push("Nationality: " + a.nationality);
+          if (a.patronus) bits.push("Patronus: " + a.patronus);
+        } else if (pick.type === "potions") {
+          if (a.effect) bits.push("Effect: " + a.effect);
+          if (a.side_effects) bits.push("Side effects: " + a.side_effects);
+          if (a.characteristics) bits.push("Characteristics: " + a.characteristics);
+          if (a.difficulty) bits.push("Difficulty: " + a.difficulty);
+        }
+
+        if (a.description && bits.length === 0) {
+          bits.push(a.description);
+        }
+
+        if (bits.length) {
+          html += "<br>" + bits.join("<br>");
+        }
+
+        el.innerHTML = html;
+      } catch (err) {
+        console.error("Potter error", err);
+        el.textContent = "The Ministry of Magic is not responding right now.";
+      }
+    }
+
+    // Bored API (App Brewery) with filters
+    async function loadBoredActivity(options = {}) {
+      const el = document.getElementById("bored-activity");
+      if (!el) return;
+
+      const typeSel = document.getElementById("bored-type");
+      const partSel = document.getElementById("bored-participants");
+
+      const type = options.type ?? (typeSel ? typeSel.value : "");
+      const participants = options.participants ?? (partSel ? partSel.value : "");
+
+      const backupIdeas = [
+        "Sort your dice by how often they have betrayed you.",
+        "Sketch a tiny dungeon room on a sticky note.",
+        "Pick one shelf and tidy only that shelf.",
+        "Write three adventure hooks set in your own street.",
+        "Take a five minute walk without your phone."
+      ];
+
+      function showFallback(message) {
+        const idea = randomFrom(backupIdeas);
+        el.innerHTML = (message ? message + "<br>" : "") + idea;
+      }
+
+      try {
+        let url = "";
+        let expectArray = false;
+
+        if (!type && !participants) {
+          url = "https://bored-api.appbrewery.com/random";
+          expectArray = false;
+        } else {
+          const params = new URLSearchParams();
+          if (type) params.set("type", type);
+          if (participants) params.set("participants", participants);
+          url = "https://bored-api.appbrewery.com/filter?" + params.toString();
+          expectArray = true;
+        }
+
+        el.textContent = "Rolling an activity...";
+
+        const resp = await fetch(url);
+        if (!resp.ok) throw new Error("Bored API error: " + resp.status);
+
+        const data = await resp.json();
+
+        let activity;
+        if (expectArray) {
+          if (!Array.isArray(data) || data.length === 0) {
+            showFallback("No activities matched those settings. Try changing the filters.");
+            return;
+          }
+          activity = randomFrom(data);
+        } else {
+          activity = data;
+        }
+
+        if (!activity || !activity.activity) {
+          showFallback();
+          return;
+        }
+
+        const a = activity;
+
+        let html = "<strong>" + a.activity + "</strong>";
+
+        const metaLines = [];
+
+        if (a.type) metaLines.push("Type: " + a.type);
+        if (typeof a.participants === "number") {
+          metaLines.push("Participants: " + a.participants);
+        }
+        if (typeof a.price === "number") {
+          const priceBand =
+            a.price === 0 ? "Free" :
+            a.price < 0.2 ? "Very low cost" :
+            a.price < 0.5 ? "Low cost" :
+            "Paid";
+          metaLines.push("Cost: " + priceBand);
+        }
+        if (a.duration) metaLines.push("Duration: " + a.duration);
+        if (a.accessibility) metaLines.push("Accessibility: " + a.accessibility);
+        if (typeof a.kidFriendly === "boolean") {
+          metaLines.push("Kid friendly: " + (a.kidFriendly ? "Yes" : "No"));
+        }
+
+        if (metaLines.length) {
+          html += "<br>" + metaLines.join(" | ");
+        }
+
+        if (a.link) {
+          html +=
+            '<br><a href="' +
+            a.link +
+            '" target="_blank" rel="noopener">Open link</a>';
+        }
+
+        el.innerHTML = html;
+      } catch (err) {
+        console.error("Bored API error", err);
+        showFallback("The activity service is having a moment.");
+      }
+    }
+
+    // CountAPI visitor counter (Miles Hilliard)
+    async function loadVisitCounter() {
+      const el = document.getElementById("visit-counter");
+      if (!el) return;
+
+      const key = "redlife_imthebus_home_v1";
+      const url =
+        "https://countapi.mileshilliard.com/api/v1/hit/" +
+        encodeURIComponent(key);
+
+      try {
+        el.textContent = "Counting visitors...";
+
+        const resp = await fetch(url);
+        if (!resp.ok) throw new Error("CountAPI error: " + resp.status);
+
+        const data = await resp.json();
+        const value = parseInt(data.value, 10) || 0;
+
+        el.textContent = "Page hits: " + value;
+
+        if (value % 10 === 0 && value !== 0) {
+          el.classList.add("sparkle");
+          setTimeout(() => el.classList.remove("sparkle"), 900);
+        }
+      } catch (err) {
+        console.error("Counter error", err);
+        el.textContent = "Counter offline.";
+      }
+    }
+
+    // QR code for this site
+    function loadQrCode() {
+      const img = document.getElementById("site-qr");
+      if (!img) return;
+
+      const currentUrl = window.location.href;
+      const encoded = encodeURIComponent(currentUrl);
+      img.src = "https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=" + encoded;
+    }
+
+    // IP2Location
+    async function loadGeoInfo() {
+      const el = document.getElementById("geo-info");
+      if (!el) return;
+
+      const apiKey = "YOUR_IP2LOCATION_API_KEY_HERE"; // replace with your key
+      if (!apiKey || apiKey.startsWith("YOUR_")) {
+        el.textContent = "Location lookup not configured yet.";
+        return;
+      }
+
+      const url = "https://api.ip2location.io/?key=" + apiKey + "&format=json";
+
+      try {
+        const resp = await fetch(url);
+        if (!resp.ok) throw new Error("Geo API error");
+        const data = await resp.json();
+
+        const parts = [];
+        if (data.city) parts.push(data.city);
+        if (data.region_name) parts.push(data.region_name);
+        if (data.country_name) parts.push(data.country_name);
+
+        let html = "";
+        if (parts.length) {
+          html += "<p>You appear to be in " + parts.join(", ") + ".</p>";
+        }
+
+        if (data.time_zone) {
+          html += "<p>Time zone: " + data.time_zone + "</p>";
+        }
+        if (data.ip) {
+          html += "<p>IP (as seen by this site): " + data.ip + "</p>";
+        }
+
+        if (!html) {
+          html = "Could not determine your location.";
+        }
+
+        html += "<p>This is a rough guess based on IP only.</p>";
+        el.innerHTML = html;
+      } catch (err) {
+        console.error("Geo error", err);
+        el.textContent = "Location lookup failed.";
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      setStatus();
+      setInterval(setStatus, 12000);
+
+      setRandomPhoto();
+      setInterval(setRandomPhoto, 15000);
+
+      loadRandomGif();
+
+      startSystemMetrics();
+      measurePing();
+
+      loadHoliday();
+      loadPotterFact();
+
+      // Bored API
+      loadBoredActivity();
+      const boredButton = document.getElementById("bored-button");
+      if (boredButton) {
+        boredButton.addEventListener("click", () => {
+          loadBoredActivity();
+        });
+      }
+
+      loadVisitCounter();
+      loadQrCode();
+      loadGeoInfo();
+
+      document.getElementById("year").textContent = new Date().getFullYear();
+    });
+  </script>
+</body>
+</html>
