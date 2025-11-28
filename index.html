@@ -1266,6 +1266,7 @@ local.time: <span id="localtime-value">00:00:00</span>
 
     // ---- POKÉMON MOVEMENT (BOUNCE IN HEADER) -----------------------------
 
+// ---- POKÉMON MOVEMENT (BOUNCE IN HEADER, INCLUDING CURSOR) -------------
 function initPokemonRunner() {
   const img = document.getElementById("pokemon-runner");
   const header = document.querySelector("header");
@@ -1274,9 +1275,24 @@ function initPokemonRunner() {
   // Start roughly in the middle of the banner
   let x = 40;
   let y = 10;
-  // Tune these for speed
   let vx = 3.5;   // horizontal speed
   let vy = 2.8;   // vertical speed
+
+  // Track mouse position relative to header
+  let cursorX = 0;
+  let cursorY = 0;
+  let cursorInside = false;
+
+  header.addEventListener("mousemove", (e) => {
+    const rect = header.getBoundingClientRect();
+    cursorX = e.clientX - rect.left;
+    cursorY = e.clientY - rect.top;
+    cursorInside = true;
+  });
+
+  header.addEventListener("mouseleave", () => {
+    cursorInside = false;
+  });
 
   function tick() {
     const maxX = header.clientWidth  - img.offsetWidth;
@@ -1303,13 +1319,36 @@ function initPokemonRunner() {
       vy *= -1;
     }
 
-    img.style.transform = `translate(${x}px, ${y}px)`;
+    // Bounce off cursor if we are close enough
+    if (cursorInside) {
+      const centerX = x + img.offsetWidth / 2;
+      const centerY = y + img.offsetHeight / 2;
+      const dx = centerX - cursorX;
+      const dy = centerY - cursorY;
+      const dist = Math.hypot(dx, dy);
+      const minDist = 50; // distance at which it "hits" the cursor
 
+      if (dist < minDist) {
+        // Flip velocity away from cursor
+        const signX = centerX < cursorX ? -1 : 1;
+        const signY = centerY < cursorY ? -1 : 1;
+
+        vx = Math.abs(vx) * signX;
+        vy = Math.abs(vy) * signY;
+
+        // Nudge it away so it doesn't jitter on the cursor
+        x += signX * 8;
+        y += signY * 8;
+      }
+    }
+
+    img.style.transform = `translate(${x}px, ${y}px)`;
     requestAnimationFrame(tick);
   }
 
   requestAnimationFrame(tick);
 }
+
 
 
     // ---- ROUVGIES MAP ----------------------------------------------------
@@ -1463,6 +1502,7 @@ function initPokemonRunner() {
   </script>
 </body>
 </html>
+
 
 
 
