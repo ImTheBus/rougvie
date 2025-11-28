@@ -38,13 +38,8 @@
     }
 
     /* Sword cursor everywhere, with fallback */
-    body,
-    a,
-    button,
-    input,
-    textarea,
-    select {
-      cursor: url("images/cursor-sword.png") 8 4, default;
+    html, body {
+      cursor: url("images/cursor-sword.png") 0 0, auto;
     }
 
     a {
@@ -228,22 +223,22 @@
     }
 
     /* Pokémon running along the nav bar */
-    .pokemon-runner {
-      position: absolute;
-      top: 54px;
-      left: -80px;
-      height: 52px;
-      pointer-events: none;
-      image-rendering: pixelated;
-      animation: pokemon-run 24s linear infinite;
-      opacity: 0.9;
-      z-index: 1;
-    }
-
-    @keyframes pokemon-run {
-      0%   { transform: translateX(-10vw); }
-      100% { transform: translateX(120vw); }
-    }
+      .pokemon-runner {
+        position: absolute;
+        top: 6px;                 /* vertical position in the pink bar */
+        left: 0;
+        height: 48px;
+        pointer-events: none;
+        image-rendering: pixelated;
+        opacity: 0.95;
+        animation: pokemon-bounce 14s linear infinite alternate;
+        z-index: 1;               /* above gradient, below text shadows if needed */
+      }
+      
+      @keyframes pokemon-bounce {
+        0%   { transform: translateX(0); }
+        100% { transform: translateX(calc(100% - 64px)); }  /* 64px ≈ sprite width */
+      }
 
     .marquee-wrapper {
       background: #000010;
@@ -272,7 +267,7 @@
     }
 
     .panel {
-      background: rgba(16, 16, 52, 0.88);
+      background: rgba(16, 16, 52, 0.68);
       border: 2px solid #ffcc00;
       margin-bottom: 12px;
       padding: 10px;
@@ -415,7 +410,7 @@
     }
 
     .content-panel {
-      background: rgba(5, 5, 24, 0.88);
+      background: rgba(5, 5, 24, 0.68);
       border: 2px solid #ffcc00;
       padding: 12px;
       margin-bottom: 12px;
@@ -644,9 +639,9 @@
     <img src="images/d20-3.png" alt="d20" class="d20-floater d20-3">
 
     <!-- floating stickers -->
-    <img class="sticker star1" src="images/glitter-star.gif" alt="sparkle">
-    <img class="sticker star2" src="images/glitter-star.gif" alt="sparkle">
-    <img class="sticker star3" src="images/glitter-star.gif" alt="sparkle">
+    <img class="sticker star1" src="images/glitter-star-1.gif" alt="sparkle">
+    <img class="sticker star2" src="images/glitter-star-2.gif" alt="sparkle">
+    <img class="sticker star3" src="images/glitter-star-3.gif" alt="sparkle">
 
     <header>
       <div class="header-top">
@@ -672,8 +667,9 @@
         <a href="#signals">Signals</a>
         <a href="#rougvies">Rougvies map</a>
         <a href="#guestbook">Guestbook</a>
-        <img id="pokemon-runner" class="pokemon-runner" alt="Random Pokémon">
+        
       </nav>
+      <img id="pokemon-runner" class="pokemon-runner" alt="Random Pokémon">
     </header>
 
     <div class="marquee-wrapper">
@@ -1418,4 +1414,5 @@ local.time: <span id="localtime-value">00:00:00</span>
   </script>
 </body>
 </html>
+
 
