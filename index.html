@@ -222,23 +222,23 @@
       background: rgba(0, 0, 0, 0.65);
     }
 
-    /* Pokémon running along the nav bar */
-      .pokemon-runner {
-        position: absolute;
-        top: 6px;                 /* vertical position in the pink bar */
-        left: 0;
-        height: 48px;
-        pointer-events: none;
-        image-rendering: pixelated;
-        opacity: 0.95;
-        animation: pokemon-bounce 14s linear infinite alternate;
-        z-index: 1;               /* above gradient, below text shadows if needed */
-      }
+    /* Pokémon bouncing inside top banner */
+    .pokemon-runner {
+      position: absolute;
+      width: 64px;
+      height: 64px;
+      pointer-events: none;
+      image-rendering: pixelated;
+      z-index: 3;           /* above banner text */
+      transform: translate(0, 0);
+    }
+    
+    header {
+      position: relative;
+      overflow: hidden;     /* keeps Pokémon inside pink banner */
+    }
       
-      @keyframes pokemon-bounce {
-        0%   { transform: translateX(0); }
-        100% { transform: translateX(calc(100% - 64px)); }  /* 64px ≈ sprite width */
-      }
+
 
     .marquee-wrapper {
       background: #000010;
@@ -669,7 +669,7 @@
         <a href="#guestbook">Guestbook</a>
         
       </nav>
-      <img id="pokemon-runner" class="pokemon-runner" alt="Random Pokémon">
+      <img id="pokemon-runner" class="pokemon-runner" src="" alt="">
     </header>
 
     <div class="marquee-wrapper">
@@ -1264,6 +1264,54 @@ local.time: <span id="localtime-value">00:00:00</span>
 
     loadRandomPokemon();
 
+    // ---- POKÉMON MOVEMENT (BOUNCE IN HEADER) -----------------------------
+
+function initPokemonRunner() {
+  const img = document.getElementById("pokemon-runner");
+  const header = document.querySelector("header");
+  if (!img || !header) return;
+
+  // Start roughly in the middle of the banner
+  let x = 40;
+  let y = 10;
+  // Tune these for speed
+  let vx = 3.5;   // horizontal speed
+  let vy = 2.8;   // vertical speed
+
+  function tick() {
+    const maxX = header.clientWidth  - img.offsetWidth;
+    const maxY = header.clientHeight - img.offsetHeight;
+
+    x += vx;
+    y += vy;
+
+    // Bounce off left/right edges
+    if (x <= 0) {
+      x = 0;
+      vx *= -1;
+    } else if (x >= maxX) {
+      x = maxX;
+      vx *= -1;
+    }
+
+    // Bounce off top/bottom edges
+    if (y <= 0) {
+      y = 0;
+      vy *= -1;
+    } else if (y >= maxY) {
+      y = maxY;
+      vy *= -1;
+    }
+
+    img.style.transform = `translate(${x}px, ${y}px)`;
+
+    requestAnimationFrame(tick);
+  }
+
+  requestAnimationFrame(tick);
+}
+
+
     // ---- ROUVGIES MAP ----------------------------------------------------
 
     let rougvieMap = null;
@@ -1410,9 +1458,11 @@ local.time: <span id="localtime-value">00:00:00</span>
     window.addEventListener("load", () => {
       initRougviesMap();
       loadGuestbook();
+      initPokemonRunner();   // <- new: start Pokémon bouncing in the header
     });
   </script>
 </body>
 </html>
+
 
 
