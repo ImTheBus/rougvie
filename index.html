@@ -65,26 +65,55 @@
       box-shadow: 0 0 25px rgba(0, 0, 0, 0.9);
       position: relative;
       overflow: hidden;
-      z-index: 2;
     }
 
-    /* Charles drifting in the background */
+    /* Charles drifting behind content, inside wrapper */
     .background-charles {
-      position: fixed;
-      top: 50%;
-      left: 0;
+      position: absolute;
+      top: 40%;
+      left: 10%;
       width: 420px;
-      opacity: 0.22;
+      opacity: 0.18;
       pointer-events: none;
-      z-index: 1;
-      transform: translate(-50%, -50%);
+      z-index: 0;
       animation: charles-drift 40s ease-in-out infinite alternate;
     }
 
     @keyframes charles-drift {
-      0%   { transform: translate(-20vw, -40vh); }
-      50%  { transform: translate(20vw, -10vh); }
-      100% { transform: translate(70vw, -30vh); }
+      0%   { transform: translate(-10vw, -30vh); }
+      50%  { transform: translate(40vw, -5vh); }
+      100% { transform: translate(70vw, -25vh); }
+    }
+
+    /* Floating d20s */
+    .d20-floater {
+      position: absolute;
+      width: 140px;
+      opacity: 0.22;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .d20-1 { animation: d20float1 38s linear infinite; }
+    .d20-2 { animation: d20float2 44s linear infinite; }
+    .d20-3 { animation: d20float3 52s linear infinite; }
+
+    @keyframes d20float1 {
+      0%   { transform: translate(-15vw, -10vh); }
+      50%  { transform: translate(20vw, 20vh); }
+      100% { transform: translate(60vw, -5vh); }
+    }
+
+    @keyframes d20float2 {
+      0%   { transform: translate(80vw, 50vh); }
+      50%  { transform: translate(30vw, 10vh); }
+      100% { transform: translate(-10vw, 40vh); }
+    }
+
+    @keyframes d20float3 {
+      0%   { transform: translate(10vw, 80vh); }
+      50%  { transform: translate(70vw, 30vh); }
+      100% { transform: translate(20vw, -10vh); }
     }
 
     .sticker {
@@ -93,6 +122,7 @@
       pointer-events: none;
       filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.6));
       animation: float 18s linear infinite;
+      z-index: 1;
     }
 
     .sticker.star1 { top: 60%; left: -80px; animation-delay: 0s; }
@@ -105,17 +135,6 @@
       100% { transform: translateX(-260px) translateY(-60px) rotate(-15deg); }
     }
 
-    /* Floating d20 overlay */
-    .floating-d20 {
-      position: fixed;
-      right: 10%;
-      top: 45%;
-      width: 420px;
-      opacity: 0.16;
-      pointer-events: none;
-      z-index: 1;
-    }
-
     header {
       border-bottom: 2px solid #ffcc00;
       padding: 10px 15px 0;
@@ -123,7 +142,7 @@
       color: #fff;
       text-shadow: 2px 2px 0 #000;
       position: relative;
-      overflow: hidden;
+      z-index: 2;
     }
 
     .header-top {
@@ -233,6 +252,8 @@
       padding: 4px 0;
       font-size: 0.9rem;
       color: #fffdc2;
+      position: relative;
+      z-index: 2;
     }
 
     .layout {
@@ -240,6 +261,8 @@
       grid-template-columns: 280px 1fr;
       gap: 10px;
       padding: 15px;
+      position: relative;
+      z-index: 2;
     }
 
     @media (max-width: 800px) {
@@ -271,7 +294,12 @@
       object-fit: cover;
       border: 3px double #ffcc00;
       margin-bottom: 6px;
-      background: #000;
+      background-color: #000;
+      background-image: url("images/captain-planet.png");
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      transform: scaleX(-1);
     }
 
     .profile-name {
@@ -392,6 +420,7 @@
       padding: 12px;
       margin-bottom: 12px;
       box-shadow: 2px 2px 0 #000;
+      position: relative;
     }
 
     .content-panel h2 {
@@ -409,14 +438,23 @@
       margin-bottom: 8px;
     }
 
+    /* fire gif glued to bottom border, no frame */
+    .about-gif-wrapper {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      border-top: 2px solid #ffcc00;
+    }
+
     .about-gif {
       display: block;
       width: 100%;
-      max-height: 200px;
+      height: 40px;
       object-fit: cover;
-      margin-top: 8px;
-      border: 2px solid #ffcc00;
-      background: #000;
+      margin: 0;
+      border: none;
+      background: transparent;
     }
 
     .gif-caption {
@@ -510,6 +548,7 @@
       height: 260px;
       border: 1px solid #ff88ff;
       margin-top: 6px;
+      background: #000;
     }
 
     .rougvie-button {
@@ -584,6 +623,8 @@
       color: #d4e6ff;
       background: #000010;
       border-top: 2px solid #ffcc00;
+      position: relative;
+      z-index: 2;
     }
 
     footer a {
@@ -593,17 +634,19 @@
 </head>
 
 <body>
-  <!-- drifting Charles in the background -->
-  <img src="images/charles.png" alt="Background Charles" class="background-charles">
-
   <div class="page-wrapper">
+    <!-- drifting Charles behind content -->
+    <img src="images/charles.png" alt="Background Charles" class="background-charles">
+
+    <!-- three floating d20s -->
+    <img src="images/d20-1.png" alt="d20" class="d20-floater d20-1">
+    <img src="images/d20-2.png" alt="d20" class="d20-floater d20-2">
+    <img src="images/d20-3.png" alt="d20" class="d20-floater d20-3">
+
     <!-- floating stickers -->
     <img class="sticker star1" src="images/glitter-star.gif" alt="sparkle">
-    <img class="sticker star2" src="images/d20.png" alt="d20">
-    <img class="sticker star3" src="images/glitter-star.gif" alt="controller">
-
-    <!-- big low-opacity d20 -->
-    <img class="floating-d20" src="images/d20.png" alt="floating d20">
+    <img class="sticker star2" src="images/glitter-star.gif" alt="sparkle">
+    <img class="sticker star3" src="images/glitter-star.gif" alt="sparkle">
 
     <header>
       <div class="header-top">
@@ -730,8 +773,9 @@ local.time: <span id="localtime-value">00:00:00</span>
             Most of what shows up here started as an experiment. Some of it became products, some of it is just here because it amused me. Expect useful tools, odd builds and the occasional glitch.
           </p>
 
-          <img id="about-gif" class="about-gif" src="images/gif-retro-2.gif" alt="Retro gif">
-          <div class="gif-caption">This one just loops here all day. Very on-brand.</div>
+          <div class="about-gif-wrapper">
+            <img id="about-gif" class="about-gif" src="images/gif-retro-2.gif" alt="Retro gif">
+          </div>
         </div>
 
         <div class="content-panel" id="shops">
@@ -746,16 +790,21 @@ local.time: <span id="localtime-value">00:00:00</span>
             </article>
 
             <article class="shop-card">
-              <h3>Red-Life Adventures (RPG)</h3>
-              <p>Adventures, tables and supplements on DriveThruRPG under the Red-Life Adventures banner.</p>
-              <p>
-                <a href="https://www.drivethrurpg.com" target="_blank" rel="noopener">
-                  Open Red-Life Adventures on DriveThruRPG
-                </a>
-              </p>
+              <h3>Red-Life Adventures</h3>
+              <p>RPG content, tables and oddities under the Red-Life Adventures banner.</p>
               <p>
                 <a href="https://red-life-adventures.co.uk" target="_blank" rel="noopener">
-                  Visit red-life-adventures.co.uk for RPG content
+                  Visit red-life-adventures.co.uk
+                </a>
+              </p>
+            </article>
+
+            <article class="shop-card">
+              <h3>DriveThruRPG titles</h3>
+              <p>Digital adventures, tables and tools released on DriveThruRPG.</p>
+              <p>
+                <a href="https://www.drivethrurpg.com" target="_blank" rel="noopener">
+                  Open titles on DriveThruRPG
                 </a>
               </p>
             </article>
@@ -872,11 +921,9 @@ local.time: <span id="localtime-value">00:00:00</span>
     const IPSTACK_KEY = "486031badb95bb1f7e9145e73a33686e";
     const SITE_URL_FOR_QR = "https://imthebus.github.io/rougvie/";
 
-    // CountAPI namespace/key
     const COUNTAPI_URL =
       "https://api.countapi.xyz/hit/imthebus-rougvie/hub";
 
-    // Google Apps Script endpoints
     const ROUVIES_ENDPOINT =
       "https://script.google.com/macros/s/AKfycbzhSzjmmpyZyklEKFDbebcnHAOMI73QdDy7rgWxit4XvCc_BPDcAxhCHen24QZr2SXZ/exec";
     const GUESTBOOK_ENDPOINT =
@@ -1021,7 +1068,6 @@ local.time: <span id="localtime-value">00:00:00</span>
           return;
         }
 
-        // take the first in the list
         const next = data[0];
         const name = next.localName || next.name;
         const country = next.countryCode || next.country;
@@ -1061,15 +1107,17 @@ local.time: <span id="localtime-value">00:00:00</span>
       const authEl = document.getElementById("quote-author");
       if (!textEl) return;
       try {
-        const resp = await fetch("https://api.quotable.io/random");
+        const resp = await fetch("https://api.quotable.io/random", {
+          headers: { "Accept": "application/json" }
+        });
         if (!resp.ok) throw new Error("Quote error");
         const data = await resp.json();
         textEl.textContent = `"${data.content}"`;
-        authEl.textContent = "— " + data.author;
+        if (authEl) authEl.textContent = "— " + data.author;
       } catch (err) {
         console.error(err);
-        textEl.textContent = "No quote loaded. Silence is also a quote.";
-        if (authEl) authEl.textContent = "";
+        textEl.textContent = "\"In case of API failure, invent your own wisdom.\"";
+        if (authEl) authEl.textContent = "— Some future Rougvie";
       }
     }
 
@@ -1088,17 +1136,23 @@ local.time: <span id="localtime-value">00:00:00</span>
         const data = await resp.json();
         const features = data.features || [];
         if (!features.length) {
-          el.textContent = "No earthquakes reported in the last hour.";
+          const q = encodeURIComponent("latest earthquake USGS");
+          el.innerHTML = `No earthquakes reported in the last hour. <a href="https://duckduckgo.com/?q=${q}" target="_blank" rel="noopener">Search USGS</a>`;
           return;
         }
         const quake = features[0];
         const mag = quake.properties.mag;
         const place = quake.properties.place;
         const time = new Date(quake.properties.time).toLocaleTimeString();
-        el.textContent = `M${mag.toFixed(1)} near ${place} at ${time}.`;
+        const url = quake.properties.url ||
+                    `https://duckduckgo.com/?q=${encodeURIComponent("USGS earthquake " + place)}`;
+
+        el.innerHTML = `M${mag.toFixed(1)} near ${place} at ${time}. ` +
+                       `<a href="${url}" target="_blank" rel="noopener">More info</a>`;
       } catch (err) {
         console.error(err);
-        el.textContent = "Could not fetch earthquake data.";
+        const q = encodeURIComponent("latest earthquake USGS");
+        el.innerHTML = `Could not fetch earthquake data. <a href="https://duckduckgo.com/?q=${q}" target="_blank" rel="noopener">Search manually</a>`;
       }
     }
 
@@ -1115,7 +1169,8 @@ local.time: <span id="localtime-value">00:00:00</span>
         const data = await resp.json();
         const launches = data.result || [];
         if (!launches.length) {
-          el.textContent = "No upcoming launches in the free feed.";
+          const q = encodeURIComponent("next rocket launch");
+          el.innerHTML = `No upcoming launches in the free feed. <a href="https://duckduckgo.com/?q=${q}" target="_blank" rel="noopener">Search manually</a>`;
           return;
         }
         const launch = launches[0];
@@ -1127,10 +1182,15 @@ local.time: <span id="localtime-value">00:00:00</span>
           ? new Date(launch.win_open).toLocaleString()
           : "TBD";
 
-        el.textContent = `${name} (${provider}) from ${pad}, planned for ${time}.`;
+        const query = encodeURIComponent(`${name} site:rocketlaunch.live`);
+        const url = `https://duckduckgo.com/?q=${query}`;
+
+        el.innerHTML = `${name} (${provider}) from ${pad}, planned for ${time}. ` +
+                       `<a href="${url}" target="_blank" rel="noopener">More info</a>`;
       } catch (err) {
         console.error(err);
-        el.textContent = "Could not fetch rocket launch data.";
+        const q = encodeURIComponent("next rocket launch");
+        el.innerHTML = `Could not fetch rocket launch data. <a href="https://duckduckgo.com/?q=${q}" target="_blank" rel="noopener">Search manually</a>`;
       }
     }
 
@@ -1231,7 +1291,7 @@ local.time: <span id="localtime-value">00:00:00</span>
       if (!rougvieMap) return;
       try {
         const resp = await fetch(ROUVIES_ENDPOINT);
-        const data = await resp.json(); // expecting array
+        const data = await resp.json();
         if (!Array.isArray(data)) return;
 
         if (countEl) countEl.textContent = data.length;
@@ -1289,7 +1349,7 @@ local.time: <span id="localtime-value">00:00:00</span>
       if (!listEl) return;
       try {
         const resp = await fetch(GUESTBOOK_ENDPOINT);
-        const data = await resp.json(); // expecting array
+        const data = await resp.json();
         if (!Array.isArray(data) || !data.length) {
           listEl.textContent = "No entries yet. Be the first scribble.";
           return;
@@ -1352,9 +1412,7 @@ local.time: <span id="localtime-value">00:00:00</span>
 
     // ---- INITIALISE MAP AFTER LEAFLET LOAD --------------------------------
     window.addEventListener("load", () => {
-      if (typeof L !== "undefined") {
-        initRougviesMap();
-      }
+      initRougviesMap();
       loadGuestbook();
     });
   </script>
