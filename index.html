@@ -5,17 +5,18 @@
   <title>Rougvie.com | Retro Hub</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <!-- Leaflet for Rougvies map -->
+  <!-- Leaflet for the Rougvies map -->
   <link
     rel="stylesheet"
     href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+    integrity="sha512-sA+e2atf6E1zFe2aTZWwqY0MyoVo9zc3rroWAtxEvsC0BpFkEuk+qS0bkkCm1cW0XkyKADVY6vwxY9G1l6Liw=="
     crossorigin=""
   />
   <script
     src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+    integrity="sha512-QV9NQZbyrC6Q4qzM0qzNPX9ekJy5o+1OtSWT8gJtIhXCTITVEWilQoNqT9bkOuM54q9WlH0hZlIsA2xzd7fQmA=="
     crossorigin=""
+    defer
   ></script>
 
   <style>
@@ -33,13 +34,24 @@
         #000020;
       color: #e6f4ff;
       min-height: 100vh;
-      cursor: url("images/cursor-sword.png") 4 4, auto; /* add this image */
+      overflow-x: hidden;
+    }
+
+    /* Sword cursor everywhere, with fallback */
+    body,
+    a,
+    button,
+    input,
+    textarea,
+    select {
+      cursor: url("images/cursor-sword.png") 8 4, default;
     }
 
     a {
       color: #90ff7a;
       text-decoration: none;
     }
+
     a:hover {
       text-decoration: underline;
       color: #fffacd;
@@ -49,10 +61,30 @@
       max-width: 1100px;
       margin: 20px auto 40px;
       border: 3px solid #ffcc00;
-      background: rgba(10, 10, 40, 0.95);
+      background: rgba(10, 10, 40, 0.96);
       box-shadow: 0 0 25px rgba(0, 0, 0, 0.9);
       position: relative;
       overflow: hidden;
+      z-index: 2;
+    }
+
+    /* Charles drifting in the background */
+    .background-charles {
+      position: fixed;
+      top: 50%;
+      left: 0;
+      width: 420px;
+      opacity: 0.22;
+      pointer-events: none;
+      z-index: 1;
+      transform: translate(-50%, -50%);
+      animation: charles-drift 40s ease-in-out infinite alternate;
+    }
+
+    @keyframes charles-drift {
+      0%   { transform: translate(-20vw, -40vh); }
+      50%  { transform: translate(20vw, -10vh); }
+      100% { transform: translate(70vw, -30vh); }
     }
 
     .sticker {
@@ -62,6 +94,7 @@
       filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.6));
       animation: float 18s linear infinite;
     }
+
     .sticker.star1 { top: 60%; left: -80px; animation-delay: 0s; }
     .sticker.star2 { top: 10%; right: -90px; animation-delay: 4s; }
     .sticker.star3 { top: 80%; right: -70px; animation-delay: 8s; }
@@ -72,25 +105,15 @@
       100% { transform: translateX(-260px) translateY(-60px) rotate(-15deg); }
     }
 
-    /* extra floating d20 that cruises across the page */
+    /* Floating d20 overlay */
     .floating-d20 {
       position: fixed;
-      width: 60px;
-      height: 60px;
-      right: -80px;
-      top: 20%;
-      opacity: 0.7;
+      right: 10%;
+      top: 45%;
+      width: 420px;
+      opacity: 0.16;
       pointer-events: none;
-      z-index: 50;
-      animation: d20-drift 28s linear infinite;
-      filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.7));
-    }
-    @keyframes d20-drift {
-      0%   { transform: translate3d(0, 0, 0) rotate(0deg); }
-      25%  { transform: translate3d(-40vw, 15vh, 0) rotate(60deg); }
-      50%  { transform: translate3d(-70vw, -5vh, 0) rotate(140deg); }
-      75%  { transform: translate3d(-20vw, -20vh, 0) rotate(240deg); }
-      100% { transform: translate3d(0, 0, 0) rotate(360deg); }
+      z-index: 1;
     }
 
     header {
@@ -99,32 +122,50 @@
       background: linear-gradient(90deg, #ff0084, #3300ff);
       color: #fff;
       text-shadow: 2px 2px 0 #000;
+      position: relative;
+      overflow: hidden;
     }
 
     .header-top {
       display: flex;
       align-items: center;
       justify-content: space-between;
+      gap: 10px;
     }
 
-    .header-left {
+    .logo-wrap {
       display: flex;
-      gap: 8px;
       align-items: center;
+      gap: 8px;
     }
 
-    .site-logo {
-      width: 52px;
-      height: 52px;
+    .site-logo-circle {
+      width: 40px;
+      height: 40px;
       border-radius: 50%;
-      background: #000;
       border: 2px solid #ffcc00;
+      background: #000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+    }
+
+    .site-logo-circle img {
+      width: 100%;
+      height: 100%;
       object-fit: cover;
+      border-radius: 50%;
     }
 
     .site-title {
-      font-size: 2.1rem;
+      font-size: 2.3rem;
       letter-spacing: 1px;
+    }
+
+    .site-tagline {
+      font-size: 0.9rem;
     }
 
     .online-status {
@@ -150,6 +191,8 @@
       border-bottom: 2px solid rgba(255, 255, 255, 0.4);
       text-align: center;
       font-size: 0.95rem;
+      position: relative;
+      z-index: 2;
     }
 
     nav a {
@@ -163,6 +206,24 @@
 
     nav a:hover {
       background: rgba(0, 0, 0, 0.65);
+    }
+
+    /* Pokémon running along the nav bar */
+    .pokemon-runner {
+      position: absolute;
+      top: 54px;
+      left: -80px;
+      height: 52px;
+      pointer-events: none;
+      image-rendering: pixelated;
+      animation: pokemon-run 24s linear infinite;
+      opacity: 0.9;
+      z-index: 1;
+    }
+
+    @keyframes pokemon-run {
+      0%   { transform: translateX(-10vw); }
+      100% { transform: translateX(120vw); }
     }
 
     .marquee-wrapper {
@@ -237,6 +298,94 @@
       color: #ff88ff;
     }
 
+    .now-playing {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.85rem;
+      margin-top: 4px;
+    }
+
+    .equalizer {
+      display: inline-flex;
+      gap: 2px;
+      align-items: flex-end;
+      height: 12px;
+    }
+
+    .bar {
+      width: 3px;
+      background: #90ff7a;
+      animation: bounce 0.8s infinite alternate;
+    }
+
+    .bar:nth-child(2) { animation-delay: 0.2s; }
+    .bar:nth-child(3) { animation-delay: 0.4s; }
+    .bar:nth-child(4) { animation-delay: 0.6s; }
+
+    @keyframes bounce {
+      0%   { height: 3px; }
+      100% { height: 12px; }
+    }
+
+    .profile-footer-gif {
+      display: block;
+      width: 100%;
+      margin-top: 6px;
+      border: 2px solid #ff88ff;
+      background: #000;
+    }
+
+    .contact-list {
+      list-style: none;
+      font-size: 0.85rem;
+      line-height: 1.6;
+    }
+
+    .status-metrics {
+      font-size: 0.8rem;
+      margin-top: 6px;
+      background: #000015;
+      border: 1px solid #00eaff;
+      padding: 6px;
+      font-family: "Consolas", "Courier New", monospace;
+      white-space: pre-line;
+    }
+
+    .tracking-text {
+      font-size: 0.85rem;
+      line-height: 1.4;
+      margin-top: 4px;
+    }
+
+    .qr-subpanel {
+      margin-top: 8px;
+      padding-top: 6px;
+      border-top: 1px solid rgba(255,255,255,0.25);
+    }
+
+    .qr-subpanel h3 {
+      font-size: 0.95rem;
+      margin-bottom: 4px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .qr-img {
+      width: 160px;
+      height: 160px;
+      border: 3px solid #ffcc00;
+      background: #fff;
+      display: block;
+      margin-top: 4px;
+    }
+
+    .friends-text {
+      font-size: 0.85rem;
+      line-height: 1.4;
+      margin-bottom: 4px;
+    }
+
     .content-panel {
       background: #050518;
       border: 2px solid #ffcc00;
@@ -258,6 +407,23 @@
       font-size: 0.95rem;
       line-height: 1.5;
       margin-bottom: 8px;
+    }
+
+    .about-gif {
+      display: block;
+      width: 100%;
+      max-height: 200px;
+      object-fit: cover;
+      margin-top: 8px;
+      border: 2px solid #ffcc00;
+      background: #000;
+    }
+
+    .gif-caption {
+      font-size: 0.8rem;
+      text-align: center;
+      opacity: 0.8;
+      margin-top: 2px;
     }
 
     .shop-grid {
@@ -302,84 +468,18 @@
       margin-bottom: 4px;
     }
 
-    .random-gif {
-      display: block;
-      margin: 8px auto 2px;
-      max-width: 160px;
-      border: 2px solid #ffcc00;
-      background: #000;
-    }
-
-    .gif-caption {
-      font-size: 0.8rem;
-      text-align: center;
-      opacity: 0.8;
-    }
-
-    .latest-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 8px;
-      margin-top: 6px;
-      font-size: 0.85rem;
-    }
-
-    .latest-card {
-      border: 1px solid #ff88ff;
-      background: #080822;
-      padding: 6px;
-    }
-
-    .latest-card strong {
-      display: block;
-      margin-bottom: 3px;
-      color: #fffdc2;
-    }
-
-    .latest-thumb {
-      width: 100%;
-      height: 120px;
-      object-fit: cover;
-      margin-bottom: 4px;
-      border: 1px solid rgba(255, 255, 255, 0.25);
-      background: #000;
-    }
-
-    .status-metrics {
-      font-size: 0.8rem;
-      margin-top: 6px;
-      background: #000015;
-      border: 1px solid #00eaff;
-      padding: 6px;
-      font-family: "Consolas", "Courier New", monospace;
-    }
-
-    .status-metrics div {
-      margin-bottom: 2px;
-    }
-
-    .visit-celebrate {
-      animation: visitPop 0.6s ease-out;
-    }
-    @keyframes visitPop {
-      0%   { transform: scale(1);   color: #e6f4ff; }
-      40%  { transform: scale(1.3); color: #fffacd; text-shadow: 0 0 8px #fffacd; }
-      100% { transform: scale(1);   color: #e6f4ff; text-shadow: none; }
-    }
-
-    /* Signals grid */
     .signals-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
       gap: 8px;
       margin-top: 6px;
-      font-size: 0.9rem;
     }
 
     .signal-card {
       border: 1px solid #ff88ff;
       background: #080822;
       padding: 6px;
+      font-size: 0.9rem;
     }
 
     .signal-card h3 {
@@ -390,129 +490,91 @@
       letter-spacing: 1px;
     }
 
-    #site-qr {
-      display: block;
-      max-width: 160px;
-      background: #000;
-      border: 2px solid #ffcc00;
-      margin-top: 4px;
+    .wiki-donate-btn {
+      display: inline-block;
+      padding: 4px 8px;
+      border: 1px solid #ffcc00;
+      background: #103050;
+      color: #fffdc2;
+      font-size: 0.85rem;
+      text-decoration: none;
     }
 
-    /* IP tracking list */
-    .geo-list {
-      list-style: none;
-      font-size: 0.9rem;
-      line-height: 1.4;
-      margin-top: 4px;
-    }
-    .geo-list li::before {
-      content: "› ";
-      color: #ffcc00;
-    }
-    .geo-note {
-      margin-top: 6px;
-      font-size: 0.8rem;
-      opacity: 0.85;
+    .wiki-donate-btn:hover {
+      background: #ffc800;
+      color: #000010;
     }
 
-    /* Rougvies map */
-    #rougvie-map {
+    .rougvies-map {
       width: 100%;
-      height: 230px;
+      height: 260px;
       border: 1px solid #ff88ff;
       margin-top: 6px;
     }
 
-    .rougvie-btn {
-      font-size: 0.85rem;
-      padding: 4px 10px;
-      border-radius: 4px;
+    .rougvie-button {
+      padding: 4px 8px;
+      border-radius: 999px;
       border: 1px solid #ffcc00;
-      background: #000020;
-      color: #e6f4ff;
-      cursor: pointer;
+      background: #101050;
+      color: #fffdc2;
+      font-size: 0.9rem;
+    }
+
+    .rougvie-button:hover {
+      background: #ffc800;
+      color: #000010;
+    }
+
+    .guestbook-form-shell {
+      border: 1px dashed #ffcc00;
+      padding: 4px;
       margin-top: 4px;
-    }
-    .rougvie-btn:hover {
-      background: #15153b;
-    }
-
-    /* Guestbook */
-    #guestbook-list {
-      margin-top: 6px;
-      max-height: 230px;
-      overflow-y: auto;
-      font-size: 0.85rem;
+      max-height: 26px;
+      overflow: hidden;
+      transition: max-height 0.3s ease;
     }
 
-    .guestbook-entry {
-      border-bottom: 1px solid rgba(255, 255, 255, 0.15);
-      padding: 4px 0;
+    .guestbook-form-shell:hover {
+      max-height: 500px;
     }
 
-    .guestbook-name {
-      font-weight: bold;
+    .guestbook-form-shell h3 {
+      margin-bottom: 4px;
+      font-size: 0.9rem;
     }
 
-    .guestbook-meta {
-      font-size: 0.75rem;
-      color: #b7c6ff;
-    }
-
-    .guestbook-message-text {
-      margin-top: 2px;
-    }
-
-    .guestbook-form input,
-    .guestbook-form textarea {
+    .guestbook-form-shell input,
+    .guestbook-form-shell textarea,
+    .guestbook-form-shell button {
       width: 100%;
       margin-bottom: 4px;
       padding: 4px;
-      background: #000020;
-      border: 1px solid #444;
-      color: #e6f4ff;
       font-family: inherit;
-      font-size: 0.85rem;
-    }
-
-    .guestbook-form textarea {
-      min-height: 60px;
-      resize: vertical;
-    }
-
-    .guestbook-form button {
-      padding: 4px 10px;
-      font-size: 0.85rem;
-      border-radius: 4px;
-      border: 1px solid #ffcc00;
+      font-size: 0.9rem;
       background: #000020;
-      color: #e6f4ff;
-      cursor: pointer;
-    }
-
-    .guestbook-form button:hover {
-      background: #15153b;
-    }
-
-    .guestbook-input-capsule {
       border: 1px solid #ff88ff;
-      background: #05051c;
-      padding: 4px 6px;
-      overflow: hidden;
-      max-height: 34px;
-      transition: max-height 0.25s ease, background 0.25s ease;
+      color: #e6f4ff;
     }
-    .guestbook-input-capsule:hover {
+
+    .guestbook-form-shell button {
+      cursor: pointer;
+      background: #101050;
+    }
+
+    .guestbook-entries {
+      font-size: 0.9rem;
+      margin-top: 8px;
       max-height: 260px;
-      background: #07072a;
+      overflow-y: auto;
+      border-top: 1px solid rgba(255,255,255,0.25);
+      padding-top: 4px;
     }
-    .guestbook-input-label {
-      font-size: 0.8rem;
-      opacity: 0.85;
-      pointer-events: none;
-    }
-    .guestbook-input-body {
-      margin-top: 4px;
+
+    .guestbook-entry {
+      margin-bottom: 6px;
+      padding-bottom: 4px;
+      border-bottom: 1px dotted rgba(255,255,255,0.2);
     }
 
     footer {
@@ -527,42 +589,33 @@
     footer a {
       color: #ff88ff;
     }
-
-    /* cursor trail dots */
-    .cursor-trail-dot {
-      position: fixed;
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      background: rgba(255, 255, 200, 0.9);
-      pointer-events: none;
-      transform: translate(-50%, -50%);
-      z-index: 9999;
-      animation: trailFade 0.4s linear forwards;
-    }
-    @keyframes trailFade {
-      0%   { opacity: 1; transform: translate(-50%, -50%) scale(1); }
-      100% { opacity: 0; transform: translate(-50%, -50%) scale(0.2); }
-    }
   </style>
 </head>
 
 <body>
-  <img class="floating-d20" src="images/d20.png" alt="floating d20">
+  <!-- drifting Charles in the background -->
+  <img src="images/charles.png" alt="Background Charles" class="background-charles">
 
   <div class="page-wrapper">
-    <!-- Floating stickers -->
+    <!-- floating stickers -->
     <img class="sticker star1" src="images/glitter-star.gif" alt="sparkle">
     <img class="sticker star2" src="images/d20.png" alt="d20">
-    <img class="sticker star3" src="images/controller.png" alt="controller">
+    <img class="sticker star3" src="images/glitter-star.gif" alt="controller">
+
+    <!-- big low-opacity d20 -->
+    <img class="floating-d20" src="images/d20.png" alt="floating d20">
 
     <header>
       <div class="header-top">
-        <div class="header-left">
-          <img id="site-logo" class="site-logo" alt="Site logo">
+        <div class="logo-wrap">
+          <div class="site-logo-circle">
+            <!-- optional logo image -->
+            <!-- <img src="images/BoldRabble.png" alt="logo"> -->
+            <span>Site<br>logo</span>
+          </div>
           <div>
             <div class="site-title">Rougvie.com</div>
-            <div style="font-size:0.9rem;">
+            <div class="site-tagline">
               Books, games, dioramas, spreadsheets, Red-Life Adventures and other Rougvie side projects.
             </div>
           </div>
@@ -572,17 +625,17 @@
 
       <nav>
         <a href="#about">About</a>
-        <a href="#spaces">Spaces & shops</a>
+        <a href="#shops">Spaces &amp; shops</a>
         <a href="#signals">Signals</a>
         <a href="#rougvies">Rougvies map</a>
         <a href="#guestbook">Guestbook</a>
+        <img id="pokemon-runner" class="pokemon-runner" alt="Random Pokémon">
       </nav>
     </header>
 
     <div class="marquee-wrapper">
       <marquee behavior="scroll" direction="left" scrollamount="4">
-        Welcome to the Rougvie.com hub. Featuring D&D nonsense, crunchy spreadsheets, terrain builds,
-        management tools and the occasional half-finished idea.
+        Welcome to the Rougvie.com hub. Featuring D&amp;D nonsense, crunchy spreadsheets, terrain builds, management tools and the occasional half-finished experiment.
       </marquee>
     </div>
 
@@ -592,7 +645,7 @@
         <div class="panel">
           <h2>Profile</h2>
 
-          <img id="profile-pic" class="profile-pic" src="images/DR.jpg" alt="Dean profile picture">
+          <img id="profile-pic" class="profile-pic" src="images/DR.png" alt="Dean profile picture">
 
           <div class="profile-name">Dean Rougvie</div>
           <div class="profile-meta">
@@ -605,44 +658,62 @@
             <div class="status-label">Current status:</div>
             <div id="status-text">Loading creative chaos...</div>
           </div>
-        </div>
 
-        <div class="panel" id="contact">
-          <h2>Contact & metrics</h2>
-          <ul style="list-style:none; font-size:0.85rem; line-height:1.6; margin-bottom:6px;">
-            <li><strong>Email:</strong> <a href="mailto:you@rougvie.com">you@rougvie.com</a></li>
-            <li><strong>Instagram:</strong> <a href="https://www.instagram.com/boldrabble/" target="_blank" rel="noopener">BoldRabble</a></li>
-            <li><strong>Topics:</strong> D&D, terrain, spreadsheets, weird ideas, warehouses.</li>
-          </ul>
-
-          <div class="status-metrics">
-            <div>sys.uptime: <span id="uptime-value">0000s</span></div>
-            <div>net.ping: <span id="ping-value">42</span> ms</div>
-            <div>cache.mood: <span id="mood-value">OK</span></div>
-            <div>visits.hits: <span id="visit-counter">...</span></div>
-            <div>local.time: <span id="localtime-value">--:--:--</span></div>
+          <div class="now-playing">
+            <div class="equalizer" aria-hidden="true">
+              <div class="bar"></div>
+              <div class="bar"></div>
+              <div class="bar"></div>
+              <div class="bar"></div>
+            </div>
+            <span>Now playing: background podcast about dice probabilities.</span>
           </div>
-        </div>
 
-        <div class="panel" id="ipinfo">
-          <h2>
-            Tracking user<span id="tracking-dots">.</span>
-          </h2>
-          <ul id="geo-list" class="geo-list">
-            <li>Initialising IP-based lookup...</li>
-          </ul>
-          <p class="geo-note">
-            This is all guessed from your IP address. If you are on a VPN, shared Wi-Fi, company network
-            or hacking the Gibson like 90s-era Jonny Lee Miller, the details will be wildly wrong.
-          </p>
+          <img src="images/gif-retro-1.gif" alt="Profile footer gif" class="profile-footer-gif">
         </div>
 
         <div class="panel">
-          <h2>Friends & links</h2>
-          <p style="font-size:0.85rem; margin-bottom:4px;">
+          <h2>Contact &amp; metrics</h2>
+          <ul class="contact-list">
+            <li><strong>Email:</strong> <a href="mailto:you@rougvie.com">you@rougvie.com</a></li>
+            <li><strong>Instagram:</strong> <a href="https://www.instagram.com/boldrabble/" target="_blank" rel="noopener">BoldRabble</a></li>
+            <li><strong>Topics:</strong> D&amp;D, terrain, spreadsheets, weird ideas, warehouses.</li>
+          </ul>
+
+          <div class="status-metrics">
+sys.uptime: <span id="uptime-value">0000s</span>
+net.ping: <span id="ping-value">42</span> ms
+cache.mood: <span id="mood-value">OK</span>
+visits.hits: <span id="visits-value">offline</span>
+local.time: <span id="localtime-value">00:00:00</span>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h2 id="tracking-heading">Tracking user.</h2>
+          <div class="tracking-text">
+            &rsaquo; Approx location: <span id="approx-location">Resolving via IP magic...</span><br>
+            &rsaquo; IP fingerprint: <span id="ip-fingerprint">...</span>
+          </div>
+          <p class="tracking-text">
+            This is all guessed from your IP address. If you are on a VPN, shared Wi-Fi, company network or hacking the Gibson like 90s-era Jonny Lee Miller, the details will be wildly wrong.
+          </p>
+
+          <div class="qr-subpanel">
+            <h3>Scan to visit later</h3>
+            <p style="font-size:0.85rem;">
+              Point a camera at this to bookmark the hub.
+            </p>
+            <img id="qr-code" class="qr-img" src="" alt="QR code for this site">
+          </div>
+        </div>
+
+        <div class="panel">
+          <h2>Friends &amp; links</h2>
+          <p class="friends-text">
             Coming soon: collaborators and other people who put up with my projects.
           </p>
-          <p style="font-size:0.8rem; opacity:0.8;">
+          <p class="friends-text" style="opacity:0.8;">
             If we have worked together and you want a link here, give me a nudge.
           </p>
         </div>
@@ -653,33 +724,40 @@
         <div class="content-panel" id="about">
           <h2>About this hub</h2>
           <p>
-            This is a simple retro hub for the Rougvie multiverse: Red-Life Adventures (RPG stuff),
-            BoldRabble (terrain and resin), ImTheBus (management tools) and whatever else is in progress.
+            This is a simple retro hub for the Rougvie multiverse: Red-Life Adventures (RPG stuff), BoldRabble (terrain and resin), ImTheBus (management tools) and whatever else is in progress.
           </p>
           <p>
-            Most of what shows up here started as an experiment. Some of it became products, some of it is
-            just here because it amused me. Expect useful tools, odd builds and the occasional glitch.
+            Most of what shows up here started as an experiment. Some of it became products, some of it is just here because it amused me. Expect useful tools, odd builds and the occasional glitch.
           </p>
 
-          <img id="random-gif" class="random-gif" src="images/gif-retro-1.gif" alt="Retro gif">
-          <div class="gif-caption">Reload to see what the system spits out next.</div>
+          <img id="about-gif" class="about-gif" src="images/gif-retro-2.gif" alt="Retro gif">
+          <div class="gif-caption">This one just loops here all day. Very on-brand.</div>
         </div>
 
-        <div class="content-panel" id="spaces">
-          <h2>Spaces & shops</h2>
+        <div class="content-panel" id="shops">
+          <h2>Spaces &amp; shops</h2>
           <p>Where the different Rougvie projects live on the wider internet.</p>
 
           <div class="shop-grid">
             <article class="shop-card">
               <h3>Rougvie.com</h3>
               <p>This hub, tying together the projects and experiments in one place.</p>
-              <p><a href="#about">You are already here.</a></p>
+              <p><em>You are already here.</em></p>
             </article>
 
             <article class="shop-card">
               <h3>Red-Life Adventures (RPG)</h3>
               <p>Adventures, tables and supplements on DriveThruRPG under the Red-Life Adventures banner.</p>
-              <p><a href="https://www.drivethrurpg.com/browse/pub/23100/RedLife-Adventures" target="_blank" rel="noopener">Open Red-Life on DriveThruRPG</a></p>
+              <p>
+                <a href="https://www.drivethrurpg.com" target="_blank" rel="noopener">
+                  Open Red-Life Adventures on DriveThruRPG
+                </a>
+              </p>
+              <p>
+                <a href="https://red-life-adventures.co.uk" target="_blank" rel="noopener">
+                  Visit red-life-adventures.co.uk for RPG content
+                </a>
+              </p>
             </article>
 
             <article class="shop-card">
@@ -689,15 +767,15 @@
             </article>
 
             <article class="shop-card">
-              <h3>Redbubble – ImTheBus</h3>
+              <h3>Redbubble &ndash; ImTheBus</h3>
               <p>Spreadsheet jokes, retro pixels and nerdy designs on mugs, shirts and more.</p>
               <p><a href="https://www.redbubble.com/people/imthebus/shop" target="_blank" rel="noopener">Visit Redbubble shop</a></p>
             </article>
 
             <article class="shop-card">
-              <h3>Etsy – RedLife3D</h3>
-              <p>Spell slot trackers, counters and printable tools for D&D and other games.</p>
-              <p><a href="https://www.etsy.com/uk/shop/RedLife3D" target="_blank" rel="noopener">Visit Etsy shop</a></p>
+              <h3>Etsy &ndash; RedLife3D</h3>
+              <p>Spell slot trackers, counters and printable tools for D&amp;D and other games.</p>
+              <p><a href="https://www.etsy.com/shop/RedLife3D" target="_blank" rel="noopener">Visit Etsy shop</a></p>
             </article>
 
             <article class="shop-card">
@@ -710,38 +788,55 @@
 
         <div class="content-panel" id="signals">
           <h2>Signals from the multiverse</h2>
+
           <div class="signals-grid">
-            <div class="signal-card">
+            <article class="signal-card" id="signal-calendar">
               <h3>Today in the calendar</h3>
-              <div id="holiday-status">Checking the next public holiday...</div>
-            </div>
+              <p id="calendar-text">Loading next global holiday...</p>
+            </article>
 
-            <div class="signal-card">
-              <h3>Random Potter lore</h3>
-              <div id="potter-fact">Summoning magical trivia...</div>
-            </div>
+            <article class="signal-card" id="signal-useless">
+              <h3>Today’s useless fact</h3>
+              <p id="useless-fact">Fetching something gloriously pointless...</p>
+            </article>
 
-            <div class="signal-card">
-              <h3>Scan to visit later</h3>
-              <p style="font-size:0.85rem;">
-                Point a camera at this to bookmark the hub.
+            <article class="signal-card" id="signal-quote">
+              <h3>Quotable quote</h3>
+              <p id="quote-text">Loading a line from someone smarter than us...</p>
+              <p id="quote-author" style="font-size:0.85rem; opacity:0.8;"></p>
+            </article>
+
+            <article class="signal-card" id="signal-quake">
+              <h3>Most recent earthquake</h3>
+              <p id="quake-text">Checking with USGS...</p>
+            </article>
+
+            <article class="signal-card" id="signal-rocket">
+              <h3>Next rocket launch</h3>
+              <p id="rocket-text">Asking RocketLaunch.Live for details...</p>
+            </article>
+
+            <article class="signal-card" id="signal-wiki">
+              <h3>Wikipedia spotlight</h3>
+              <p id="wiki-text">Finding what everyone just looked up...</p>
+              <p style="margin-top:6px;">
+                <a href="https://donate.wikimedia.org" target="_blank" rel="noopener"
+                   class="wiki-donate-btn">Support Wikipedia</a>
               </p>
-              <img id="site-qr" alt="QR code for this site">
-            </div>
+            </article>
           </div>
         </div>
 
         <div class="content-panel" id="rougvies">
           <h2>Rougvies of the world</h2>
-          <p style="font-size:0.9rem;">
-            I am a Rougvie, but not all Rougvies. If you are a Rougvie who found this site, click the button
-            below to check in and add yourself to the map for future Rougvies to see.
+          <p>
+            I am a Rougvie, but not all Rougvies. If you are a Rougvie who found this site, click the button below to check in and add yourself to the map for future Rougvies to see.
           </p>
-          <button id="im-rougvie-btn" type="button" class="rougvie-btn">
-            I am a Rougvie – add me
-          </button>
-          <div id="rougvie-message" style="font-size:0.85rem; margin-top:4px;"></div>
-          <div id="rougvie-map"></div>
+          <button id="rougvie-add-btn" class="rougvie-button">I am a Rougvie &ndash; add me</button>
+          <p style="margin-top:4px; font-size:0.85rem;">
+            Currently tracking <span id="rougvie-count">0</span> Rougvie visit(s).
+          </p>
+          <div id="rougvies-map" class="rougvies-map"></div>
         </div>
 
         <div class="content-panel" id="guestbook">
@@ -750,22 +845,17 @@
             Old-school guestbook. Say hi so future Dean knows who passed through.
           </p>
 
-          <div class="guestbook-input-capsule">
-            <div class="guestbook-input-label">
-              Hover to expand and sign the guestbook.
-            </div>
-            <div class="guestbook-input-body">
-              <form class="guestbook-form" id="guestbook-form">
-                <input type="text" id="guestbook-name" placeholder="Name (optional)">
-                <input type="text" id="guestbook-city" placeholder="City (optional)">
-                <textarea id="guestbook-message-input" placeholder="Message"></textarea>
-                <button type="submit">Sign guestbook</button>
-              </form>
-              <div id="guestbook-message" style="font-size:0.8rem; margin-top:2px;"></div>
-            </div>
+          <div class="guestbook-form-shell">
+            <h3>Hover to sign the guestbook</h3>
+            <input id="gb-name" type="text" placeholder="Name (optional)">
+            <input id="gb-city" type="text" placeholder="City (optional)">
+            <textarea id="gb-message" rows="3" placeholder="Message"></textarea>
+            <button id="gb-submit-btn">Sign guestbook</button>
           </div>
 
-          <div id="guestbook-list"></div>
+          <div id="guestbook-entries" class="guestbook-entries">
+            Loading previous scribbles...
+          </div>
         </div>
       </section>
     </main>
@@ -777,38 +867,23 @@
   </div>
 
   <script>
-    // BASIC CONFIG
-    // For the logo / profile you have two easy options:
-    // 1) Put DR.jpg and BoldRabble.png in /images and leave these as-is.
-    // 2) Swap these lines to direct Google Drive file URLs (not the folder URL),
-    //    e.g. "https://drive.google.com/uc?export=view&id=FILE_ID_HERE".
-    const PROFILE_IMG_URL = "images/DR.jpg";
-    const LOGO_IMG_URL    = "images/BoldRabble.png";
+    // ---- CONSTANTS --------------------------------------------------------
 
     const IPSTACK_KEY = "486031badb95bb1f7e9145e73a33686e";
+    const SITE_URL_FOR_QR = "https://imthebus.github.io/rougvie/";
 
-    const ROUVGIES_API_URL  =
+    // CountAPI namespace/key
+    const COUNTAPI_URL =
+      "https://api.countapi.xyz/hit/imthebus-rougvie/hub";
+
+    // Google Apps Script endpoints
+    const ROUVIES_ENDPOINT =
       "https://script.google.com/macros/s/AKfycbzhSzjmmpyZyklEKFDbebcnHAOMI73QdDy7rgWxit4XvCc_BPDcAxhCHen24QZr2SXZ/exec";
-    const GUESTBOOK_API_URL =
+    const GUESTBOOK_ENDPOINT =
       "https://script.google.com/macros/s/AKfycbzmAAURMWxt9OfZP4C5aJrFLF0WWRhE7yibp01-E_5wDDTIkjwsePJCy87LomCF-Iw/exec";
 
-    const SITE_URL_FOR_QR = "https://rougvie.com";
+    // ---- STATUS TEXT ------------------------------------------------------
 
-    function randomFrom(arr) {
-      return arr[Math.floor(Math.random() * arr.length)];
-    }
-
-    // Cursor trail
-    document.addEventListener("mousemove", (e) => {
-      const dot = document.createElement("div");
-      dot.className = "cursor-trail-dot";
-      dot.style.left = e.clientX + "px";
-      dot.style.top = e.clientY + "px";
-      document.body.appendChild(dot);
-      setTimeout(() => dot.remove(), 400);
-    });
-
-    // Status messages
     const statuses = [
       "Painting tiny rocks and pretending it is productive.",
       "Writing encounter tables instead of finishing campaigns.",
@@ -819,452 +894,469 @@
 
     function setStatus() {
       const el = document.getElementById("status-text");
-      if (!el) return;
-      el.textContent = randomFrom(statuses);
+      const pick = statuses[Math.floor(Math.random() * statuses.length)];
+      el.textContent = pick;
     }
 
-    // Random gif
-    function setRandomGif() {
-      const gifs = [
-        "images/gif-retro-1.gif",
-        "images/gif-retro-2.gif",
-        "images/gif-retro-3.gif"
-      ];
-      const gifEl = document.getElementById("random-gif");
-      if (gifEl) gifEl.src = randomFrom(gifs);
-    }
+    setStatus();
+    setInterval(setStatus, 12000);
 
-    // System metrics
+    // ---- METRICS & VISITS -------------------------------------------------
+
+    const pingEl = document.getElementById("ping-value");
+    const uptimeEl = document.getElementById("uptime-value");
+    const moodEl = document.getElementById("mood-value");
+    const visitsEl = document.getElementById("visits-value");
+    const localTimeEl = document.getElementById("localtime-value");
+
     let uptime = 0;
     const moods = ["OK", "OK", "OK", "IDLE", "BUILDING", "LOADING"];
 
     function updateMetrics() {
-      const pingEl = document.getElementById("ping-value");
-      const uptimeEl = document.getElementById("uptime-value");
-      const moodEl = document.getElementById("mood-value");
-      const timeEl = document.getElementById("localtime-value");
-
       uptime += Math.floor(Math.random() * 4) + 1;
-      if (uptimeEl) uptimeEl.textContent = String(uptime).padStart(4, "0") + "s";
+      uptimeEl.textContent = String(uptime).padStart(4, "0") + "s";
 
       const ping = 15 + Math.floor(Math.random() * 80);
-      if (pingEl) pingEl.textContent = ping;
+      pingEl.textContent = ping;
 
-      if (moodEl) moodEl.textContent = randomFrom(moods);
+      const moodPick = moods[Math.floor(Math.random() * moods.length)];
+      moodEl.textContent = moodPick;
 
       const now = new Date();
-      if (timeEl) timeEl.textContent = now.toLocaleTimeString();
+      localTimeEl.textContent = now.toLocaleTimeString();
     }
 
-    // Visit counter
-    async function initVisitCounter() {
-      const el = document.getElementById("visit-counter");
-      if (!el) return;
+    updateMetrics();
+    setInterval(updateMetrics, 3000);
+
+    async function loadVisitorCount() {
+      if (!visitsEl) return;
       try {
-        const resp = await fetch("https://api.countapi.xyz/hit/rougvie.com/retro-hub");
+        const resp = await fetch(COUNTAPI_URL);
         const data = await resp.json();
-        el.textContent = data.value;
-        if (data.value % 10 === 0) {
-          el.classList.remove("visit-celebrate");
-          // force reflow
-          void el.offsetWidth;
-          el.classList.add("visit-celebrate");
-        }
+        visitsEl.textContent = data.value ?? "online";
       } catch (err) {
         console.error("CountAPI error", err);
-        el.textContent = "offline";
+        visitsEl.textContent = "offline";
       }
     }
 
-    // Tracking dots for IP heading
-    function initTrackingDots() {
-      const el = document.getElementById("tracking-dots");
-      if (!el) return;
-      const states = [".", "..", "..."];
-      let i = 0;
-      setInterval(() => {
-        i = (i + 1) % states.length;
-        el.textContent = states[i];
-      }, 600);
+    loadVisitorCount();
+
+    // ---- TRACKING USER HEADING DOTS --------------------------------------
+
+    const trackingHeading = document.getElementById("tracking-heading");
+    let trackingDotCount = 1;
+
+    setInterval(() => {
+      if (!trackingHeading) return;
+      trackingDotCount = (trackingDotCount % 3) + 1;
+      const dots = ".".repeat(trackingDotCount);
+      trackingHeading.textContent = "Tracking user" + dots;
+    }, 1200);
+
+    // ---- IP LOCATION / IPSTACK -------------------------------------------
+
+    let lastLat = null;
+    let lastLon = null;
+
+    async function loadIpInfo() {
+      const locEl = document.getElementById("approx-location");
+      const ipEl = document.getElementById("ip-fingerprint");
+      if (!locEl || !ipEl) return;
+
+      try {
+        const resp = await fetch(
+          "https://api.ipstack.com/check?access_key=" + IPSTACK_KEY
+        );
+        if (!resp.ok) throw new Error("ipstack blocked or error");
+        const data = await resp.json();
+
+        const city = data.city || "Somewhere";
+        const region = data.region_name || "";
+        const country = data.country_name || data.country_code || "Earth";
+        const zip = data.zip || "";
+        const textLoc = [city, region, country, zip].filter(Boolean).join(", ");
+
+        locEl.textContent = textLoc || "Unknown, somewhere on Earth";
+        ipEl.textContent = data.ip || "hidden in the void";
+
+        if (typeof data.latitude === "number" && typeof data.longitude === "number") {
+          lastLat = data.latitude;
+          lastLon = data.longitude;
+        }
+      } catch (err) {
+        console.error("IP info error", err);
+        locEl.textContent = "Could not resolve location (VPNs and old movie hackers confuse the system).";
+        ipEl.textContent = "Unavailable";
+      }
     }
 
-    // Holiday
-    async function loadHoliday() {
-      const el = document.getElementById("holiday-status");
+    loadIpInfo();
+
+    // ---- QR CODE ----------------------------------------------------------
+
+    function buildQrUrl(data) {
+      const encoded = encodeURIComponent(data);
+      return `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encoded}`;
+    }
+
+    const qrImg = document.getElementById("qr-code");
+    if (qrImg) {
+      qrImg.src = buildQrUrl(SITE_URL_FOR_QR);
+    }
+
+    // ---- NEXT HOLIDAY -----------------------------------------------------
+
+    async function loadNextHoliday() {
+      const el = document.getElementById("calendar-text");
       if (!el) return;
 
       try {
         const resp = await fetch("https://date.nager.at/api/v3/NextPublicHolidaysWorldwide");
-        if (!resp.ok) throw new Error("holiday error");
-        const list = await resp.json();
-        if (!Array.isArray(list) || !list.length) {
-          el.textContent = "No holiday data available.";
+        if (!resp.ok) throw new Error("Holiday API error");
+        const data = await resp.json();
+        if (!Array.isArray(data) || !data.length) {
+          el.textContent = "No future holidays found, which feels unlikely.";
           return;
         }
-        const todayStr = new Date().toISOString().slice(0, 10);
-        const next = list.reduce((best, h) => {
-          if (h.date < todayStr) return best;
-          if (!best) return h;
-          return h.date < best.date ? h : best;
-        }, null);
-        if (!next) {
-          el.textContent = "No upcoming holidays found.";
-          return;
-        }
-        el.textContent =
-          "Next public holiday anywhere: " +
-          next.localName +
-          " (" + next.name + ") in " +
-          next.countryCode +
-          " on " + next.date + ".";
+
+        // take the first in the list
+        const next = data[0];
+        const name = next.localName || next.name;
+        const country = next.countryCode || next.country;
+        const date = next.date;
+
+        el.textContent = `Next public holiday anywhere: ${name} in ${country} on ${date}.`;
       } catch (err) {
-        console.error("Holiday error", err);
-        el.textContent = "Holiday service is not responding.";
+        console.error(err);
+        el.textContent = "Holiday API not responding. Everyone is on a break.";
       }
     }
 
-    // PotterDB
-    async function loadPotterFact() {
-      const el = document.getElementById("potter-fact");
+    loadNextHoliday();
+
+    // ---- USELESS FACT -----------------------------------------------------
+
+    async function loadUselessFact() {
+      const el = document.getElementById("useless-fact");
       if (!el) return;
-
-      const resources = [
-        { type: "spells", label: "Spell" },
-        { type: "characters", label: "Character" },
-        { type: "potions", label: "Potion" }
-      ];
-      const pick = randomFrom(resources);
-      const pageSize = 1;
-      const randomPage = Math.floor(Math.random() * 50) + 1;
-
-      const url =
-        "https://api.potterdb.com/v1/" +
-        pick.type +
-        "?page[size]=" +
-        pageSize +
-        "&page[number]=" +
-        randomPage;
-
       try {
-        const resp = await fetch(url);
-        if (!resp.ok) throw new Error("Potter error");
+        const resp = await fetch("https://uselessfacts.jsph.pl/api/v2/facts/random?language=en");
+        if (!resp.ok) throw new Error("Useless facts error");
         const data = await resp.json();
-        const item = data.data && data.data[0];
-        if (!item) throw new Error("No Potter data");
-        const a = item.attributes || {};
-        let html = "<strong>" + pick.label + ":</strong> " + (a.name || a.slug || "(no name)");
-        const bits = [];
-        if (pick.type === "spells") {
-          if (a.incantation) bits.push("Incantation: " + a.incantation);
-          if (a.category) bits.push("Category: " + a.category);
-          if (a.effect) bits.push("Effect: " + a.effect);
-        } else if (pick.type === "characters") {
-          if (a.house) bits.push("House: " + a.house);
-          if (a.blood_status) bits.push("Blood status: " + a.blood_status);
-          if (a.nationality) bits.push("Nationality: " + a.nationality);
-          if (a.patronus) bits.push("Patronus: " + a.patronus);
-        } else if (pick.type === "potions") {
-          if (a.effect) bits.push("Effect: " + a.effect);
-          if (a.side_effects) bits.push("Side effects: " + a.side_effects);
-          if (a.characteristics) bits.push("Characteristics: " + a.characteristics);
-          if (a.difficulty) bits.push("Difficulty: " + a.difficulty);
-        }
-        if (a.description && !bits.length) bits.push(a.description);
-        if (bits.length) html += "<br>" + bits.join("<br>");
-        el.innerHTML = html;
+        el.textContent = data.text || "The fact database had nothing to say.";
       } catch (err) {
-        console.error("Potter error", err);
-        el.textContent = "The Ministry of Magic is not sending data right now.";
+        console.error(err);
+        el.textContent = "Could not load a useless fact right now.";
       }
     }
 
-    // QR code
-    function initQRCode() {
-      const img = document.getElementById("site-qr");
-      if (!img) return;
-      const encoded = encodeURIComponent(SITE_URL_FOR_QR);
-      img.src = "https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=" + encoded;
+    loadUselessFact();
+
+    // ---- QUOTABLE QUOTE ---------------------------------------------------
+
+    async function loadQuote() {
+      const textEl = document.getElementById("quote-text");
+      const authEl = document.getElementById("quote-author");
+      if (!textEl) return;
+      try {
+        const resp = await fetch("https://api.quotable.io/random");
+        if (!resp.ok) throw new Error("Quote error");
+        const data = await resp.json();
+        textEl.textContent = `"${data.content}"`;
+        authEl.textContent = "— " + data.author;
+      } catch (err) {
+        console.error(err);
+        textEl.textContent = "No quote loaded. Silence is also a quote.";
+        if (authEl) authEl.textContent = "";
+      }
     }
 
-    // IPSTACK geo
-    let lastGeoLat = null;
-    let lastGeoLon = null;
-    let lastGeoCity = null;
-    let lastGeoCountry = null;
+    loadQuote();
 
-    async function loadGeoInfo() {
-      const listEl = document.getElementById("geo-list");
-      if (!listEl) return;
+    // ---- LATEST EARTHQUAKE (USGS) ----------------------------------------
 
-      listEl.innerHTML = "<li>Contacting ipstack...</li>";
+    async function loadLatestQuake() {
+      const el = document.getElementById("quake-text");
+      if (!el) return;
+      try {
+        const resp = await fetch(
+          "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_hour.geojson"
+        );
+        if (!resp.ok) throw new Error("USGS error");
+        const data = await resp.json();
+        const features = data.features || [];
+        if (!features.length) {
+          el.textContent = "No earthquakes reported in the last hour.";
+          return;
+        }
+        const quake = features[0];
+        const mag = quake.properties.mag;
+        const place = quake.properties.place;
+        const time = new Date(quake.properties.time).toLocaleTimeString();
+        el.textContent = `M${mag.toFixed(1)} near ${place} at ${time}.`;
+      } catch (err) {
+        console.error(err);
+        el.textContent = "Could not fetch earthquake data.";
+      }
+    }
+
+    loadLatestQuake();
+
+    // ---- NEXT ROCKET LAUNCH ----------------------------------------------
+
+    async function loadNextRocket() {
+      const el = document.getElementById("rocket-text");
+      if (!el) return;
+      try {
+        const resp = await fetch("https://fdo.rocketlaunch.live/json/launches/next/5");
+        if (!resp.ok) throw new Error("RocketLaunch error");
+        const data = await resp.json();
+        const launches = data.result || [];
+        if (!launches.length) {
+          el.textContent = "No upcoming launches in the free feed.";
+          return;
+        }
+        const launch = launches[0];
+        const name = launch.name || "Unnamed mission";
+        const provider = (launch.provider && launch.provider.name) || "Unknown provider";
+        const pad = (launch.pad && (launch.pad.location && launch.pad.location.name)) ||
+                    (launch.pad && launch.pad.name) || "Unknown pad";
+        const time = launch.win_open
+          ? new Date(launch.win_open).toLocaleString()
+          : "TBD";
+
+        el.textContent = `${name} (${provider}) from ${pad}, planned for ${time}.`;
+      } catch (err) {
+        console.error(err);
+        el.textContent = "Could not fetch rocket launch data.";
+      }
+    }
+
+    loadNextRocket();
+
+    // ---- WIKIPEDIA TOP PAGE ----------------------------------------------
+
+    async function loadWikiTop() {
+      const el = document.getElementById("wiki-text");
+      if (!el) return;
+      try {
+        const now = new Date();
+        now.setDate(now.getDate() - 1); // yesterday
+        const y = now.getFullYear();
+        const m = String(now.getMonth() + 1).padStart(2, "0");
+        const d = String(now.getDate()).padStart(2, "0");
+
+        const url =
+          `https://wikimedia.org/api/rest_v1/metrics/pageviews/top/en.wikipedia/all-access/${y}/${m}/${d}`;
+        const resp = await fetch(url);
+        if (!resp.ok) throw new Error("Wikipedia error");
+        const data = await resp.json();
+        const items = data.items?.[0]?.articles || [];
+
+        const ignore = new Set(["Main_Page", "Special:Search"]);
+        const top = items.find(a => !ignore.has(a.article));
+
+        if (!top) {
+          el.textContent = "No usable pageview data for yesterday.";
+          return;
+        }
+
+        const title = decodeURIComponent(top.article.replace(/_/g, " "));
+        el.innerHTML =
+          `Yesterday’s most viewed article was ` +
+          `<a href="https://en.wikipedia.org/wiki/${encodeURIComponent(top.article)}" ` +
+          `target="_blank" rel="noopener">${title}</a> ` +
+          `with ${top.views.toLocaleString()} views.`;
+      } catch (err) {
+        console.error(err);
+        el.textContent = "Could not fetch Wikipedia pageview data.";
+      }
+    }
+
+    loadWikiTop();
+
+    // ---- RANDOM POKÉMON --------------------------------------------------
+
+    async function loadRandomPokemon() {
+      const img = document.getElementById("pokemon-runner");
+      if (!img) return;
 
       try {
-        const url = "https://api.ipstack.com/check?access_key=" + IPSTACK_KEY + "&output=json";
-        const resp = await fetch(url);
-        if (!resp.ok) throw new Error("ipstack error " + resp.status);
+        const maxId = 898;
+        const id = Math.floor(Math.random() * maxId) + 1;
+        const resp = await fetch(`https://pokeapi.co/api/v2/pokemon/${id}`);
+        if (!resp.ok) throw new Error("PokeAPI error");
         const data = await resp.json();
 
-        lastGeoLat = data.latitude;
-        lastGeoLon = data.longitude;
-        lastGeoCity = data.city;
-        lastGeoCountry = data.country_name;
+        const sprite =
+          data.sprites.other?.["official-artwork"]?.front_default ||
+          data.sprites.front_default;
 
-        const pieces = [];
-
-        if (data.city || data.region_name || data.country_name) {
-          pieces.push(
-            "Approx location: " +
-            [data.city, data.region_name, data.country_name].filter(Boolean).join(", ") +
-            (data.zip ? " (" + data.zip + ")" : "")
-          );
+        if (sprite) {
+          img.src = sprite;
+        } else {
+          img.style.display = "none";
         }
+      } catch (err) {
+        console.error("Pokemon error:", err);
+        const img = document.getElementById("pokemon-runner");
+        if (img) img.style.display = "none";
+      }
+    }
 
-        const tz = data.time_zone || {};
-        if (tz.id) pieces.push("Time zone (ish): " + tz.id);
+    loadRandomPokemon();
 
-        const conn = data.connection || {};
-        if (conn.isp || conn.organization) {
-          pieces.push(
-            "Seen as: " +
-            [conn.isp, conn.organization].filter(Boolean).join(" – ")
-          );
-        }
+    // ---- ROUVGIES MAP ----------------------------------------------------
 
-        const ip = data.ip || data.ipv4 || "";
-        if (ip) pieces.push("IP fingerprint: " + ip);
+    let rougvieMap = null;
 
-        if (!pieces.length) {
-          pieces.push("No useful data came back from the IP lookup.");
-        }
+    function initRougviesMap() {
+      const mapDiv = document.getElementById("rougvies-map");
+      if (!mapDiv || typeof L === "undefined") return;
 
-        listEl.innerHTML = "";
-        pieces.forEach(text => {
-          const li = document.createElement("li");
-          li.textContent = text;
-          listEl.appendChild(li);
+      rougvieMap = L.map("rougvies-map").setView([20, 0], 2);
+
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        maxZoom: 5,
+        attribution: "&copy; OpenStreetMap"
+      }).addTo(rougvieMap);
+
+      loadRougvies();
+    }
+
+    async function loadRougvies() {
+      const countEl = document.getElementById("rougvie-count");
+      if (!rougvieMap) return;
+      try {
+        const resp = await fetch(ROUVIES_ENDPOINT);
+        const data = await resp.json(); // expecting array
+        if (!Array.isArray(data)) return;
+
+        if (countEl) countEl.textContent = data.length;
+
+        data.forEach(row => {
+          const lat = Number(row.lat);
+          const lon = Number(row.lon);
+          if (!isFinite(lat) || !isFinite(lon)) return;
+          const name = row.name || "Rougvie";
+          const city = row.city || "";
+          const label = city ? `${name} (${city})` : name;
+          L.circleMarker([lat, lon], {
+            radius: 5,
+            color: "#ffcc00",
+            fillColor: "#ff88ff",
+            fillOpacity: 0.9
+          }).addTo(rougvieMap).bindPopup(label);
         });
       } catch (err) {
-        console.error("Geo error", err);
-        listEl.innerHTML = "<li>IP lookup failed. Assume Earth and carry on.</li>";
+        console.error("Rougvies load error", err);
       }
     }
 
-    // Rougvies map
-    let rougvieMap;
-    let rougvieLayer;
-
-    function initRougvieMap() {
-      const container = document.getElementById("rougvie-map");
-      if (!container) return;
-      rougvieMap = L.map("rougvie-map", { zoomControl: false }).setView([20, 0], 2);
-      L.tileLayer(
-        "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
-        {
-          attribution:
-            '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors ' +
-            '&copy; <a href="https://carto.com/attributions">CARTO</a>',
-          maxZoom: 19
-        }
-      ).addTo(rougvieMap);
-      rougvieLayer = L.layerGroup().addTo(rougvieMap);
-    }
-
-    function renderRougvieMap(entries) {
-      if (!rougvieMap || !rougvieLayer) return;
-
-      rougvieLayer.clearLayers();
-      if (!entries || !entries.length) {
-        rougvieMap.setView([20, 0], 2);
-        return;
-      }
-
-      const latLngs = [];
-
-      entries.forEach(row => {
-        if (row.lat == null || row.lon == null) return;
-        const lat = Number(row.lat);
-        const lon = Number(row.lon);
-        if (Number.isNaN(lat) || Number.isNaN(lon)) return;
-
-        latLngs.push([lat, lon]);
-
-        const label =
-          (row.first_name || "Unknown") +
-          (row.city || row.country ? " – " + [row.city, row.country].filter(Boolean).join(", ") : "");
-
-        L.circleMarker([lat, lon], {
-          radius: 5,
-          color: "#36ff6f",
-          fillColor: "#36ff6f",
-          fillOpacity: 0.9
-        }).addTo(rougvieLayer).bindPopup(label);
-      });
-
-      if (latLngs.length === 1) {
-        rougvieMap.setView(latLngs[0], 5);
-      } else if (latLngs.length > 1) {
-        rougvieMap.fitBounds(latLngs, { padding: [20, 20] });
-      }
-    }
-
-    async function fetchRougvies() {
-      const msg = document.getElementById("rougvie-message");
-      try {
-        const resp = await fetch(ROUVGIES_API_URL);
-        const data = await resp.json();
-        renderRougvieMap(data);
-        if (msg) {
-          msg.textContent = data.length
-            ? "Currently tracking " + data.length + " Rougvie visit(s)."
-            : "No Rougvies added yet. You might be the first.";
-        }
-      } catch (err) {
-        console.error("Rougvie fetch error", err);
-        if (msg) msg.textContent = "Could not load Rougvies right now.";
-      }
-    }
-
-    async function handleRougvieClick() {
-      const msg = document.getElementById("rougvie-message");
-
-      const firstName = window.prompt("What is your first name?");
-      if (!firstName || !firstName.trim()) {
-        if (msg) msg.textContent = "No worries, you can add yourself later.";
-        return;
-      }
-
-      if (lastGeoLat == null || lastGeoLon == null) {
-        if (msg) msg.textContent =
-          "I cannot see an approximate location yet. Reload the page then try again.";
-        return;
-      }
+    async function addRougvie() {
+      const name = prompt("First name (optional, can be a nickname):", "");
+      const city = prompt("City you want to show on the map:", "") || "";
 
       const payload = {
-        first_name: firstName.trim(),
-        city: lastGeoCity || "",
-        country: lastGeoCountry || "",
-        lat: lastGeoLat,
-        lon: lastGeoLon
+        name: name || "Rougvie",
+        city: city,
+        lat: lastLat,
+        lon: lastLon
       };
 
       try {
-        await fetch(ROUVGIES_API_URL, {
+        await fetch(ROUVIES_ENDPOINT, {
           method: "POST",
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload)
         });
-        if (msg) msg.textContent = "You have been added to the Rougvie map.";
-        fetchRougvies();
+        alert("Rougvie check-in sent. Reloading markers.");
+        loadRougvies();
       } catch (err) {
         console.error("Rougvie add error", err);
-        if (msg) msg.textContent = "Could not add you right now.";
+        alert("Could not add you to the map. Blame the goblins in the wires.");
       }
     }
 
-    // Guestbook
-    async function fetchGuestbook() {
-      const listEl = document.getElementById("guestbook-list");
+    document.getElementById("rougvie-add-btn")?.addEventListener("click", addRougvie);
+
+    // ---- GUESTBOOK -------------------------------------------------------
+
+    async function loadGuestbook() {
+      const listEl = document.getElementById("guestbook-entries");
       if (!listEl) return;
-
-      listEl.innerHTML = "<p>Loading guestbook...</p>";
-
       try {
-        const resp = await fetch(GUESTBOOK_API_URL);
-        const data = await resp.json();
+        const resp = await fetch(GUESTBOOK_ENDPOINT);
+        const data = await resp.json(); // expecting array
         if (!Array.isArray(data) || !data.length) {
-          listEl.innerHTML = "<p>No messages yet, be the first.</p>";
+          listEl.textContent = "No entries yet. Be the first scribble.";
           return;
         }
-
         listEl.innerHTML = "";
-        data.slice().reverse().forEach(entry => {
-          const wrap = document.createElement("div");
-          wrap.className = "guestbook-entry";
-
-          const name = entry.name || "Anonymous";
-          const city = entry.city || "";
-          const ts = entry.timestamp ? new Date(entry.timestamp) : null;
-
-          const meta = [];
-          if (city) meta.push(city);
-          if (ts && !isNaN(ts)) meta.push(ts.toLocaleString());
-
-          wrap.innerHTML =
-            '<div class="guestbook-name">' + name + "</div>" +
-            (meta.length ? '<div class="guestbook-meta">' + meta.join(" | ") + "</div>" : "") +
-            '<div class="guestbook-message-text">' + (entry.message || "") + "</div>";
-
-          listEl.appendChild(wrap);
+        data.slice().reverse().forEach(row => {
+          const div = document.createElement("div");
+          div.className = "guestbook-entry";
+          const name = row.name || "Anonymous";
+          const city = row.city || "";
+          const msg = row.message || "";
+          const stamp = row.timestamp || "";
+          div.innerHTML =
+            `<strong>${name}</strong>` +
+            (city ? ` &mdash; ${city}` : "") +
+            (stamp ? ` <span style="font-size:0.8rem; opacity:0.7;">| ${stamp}</span>` : "") +
+            `<div>${msg}</div>`;
+          listEl.appendChild(div);
         });
       } catch (err) {
-        console.error("Guestbook fetch error", err);
-        listEl.innerHTML = "<p>Could not load guestbook right now.</p>";
+        console.error("Guestbook load error", err);
+        listEl.textContent = "Could not load guestbook entries.";
       }
     }
 
-    async function submitGuestbook(event) {
-      event.preventDefault();
-      const nameEl = document.getElementById("guestbook-name");
-      const cityEl = document.getElementById("guestbook-city");
-      const msgEl = document.getElementById("guestbook-message-input");
-      const statusEl = document.getElementById("guestbook-message");
-
-      const name = (nameEl.value || "").trim() || "Anonymous";
-      const city = (cityEl.value || "").trim();
-      const message = (msgEl.value || "").trim();
-
+    async function submitGuestbook() {
+      const nameEl = document.getElementById("gb-name");
+      const cityEl = document.getElementById("gb-city");
+      const msgEl = document.getElementById("gb-message");
+      const message = msgEl.value.trim();
       if (!message) {
-        statusEl.textContent = "Please write a message first.";
+        alert("Please write a message before signing.");
         return;
       }
-
-      statusEl.textContent = "Sending...";
+      const payload = {
+        name: nameEl.value.trim() || "Anonymous",
+        city: cityEl.value.trim(),
+        message
+      };
       try {
-        await fetch(GUESTBOOK_API_URL, {
+        await fetch(GUESTBOOK_ENDPOINT, {
           method: "POST",
-          body: JSON.stringify({ name, city, message })
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
         });
-        statusEl.textContent = "Thank you, your message has been added.";
         msgEl.value = "";
-        fetchGuestbook();
+        alert("Guestbook signed. Thanks!");
+        loadGuestbook();
       } catch (err) {
         console.error("Guestbook submit error", err);
-        statusEl.textContent = "Could not send that right now.";
+        alert("Could not sign the guestbook right now.");
       }
     }
 
-    // Init
-    document.addEventListener("DOMContentLoaded", () => {
-      // Logo / profile
-      const logoEl = document.getElementById("site-logo");
-      if (logoEl) logoEl.src = LOGO_IMG_URL;
-      const profileEl = document.getElementById("profile-pic");
-      if (profileEl) profileEl.src = PROFILE_IMG_URL;
+    document.getElementById("gb-submit-btn")?.addEventListener("click", submitGuestbook);
 
-      setStatus();
-      setInterval(setStatus, 12000);
-      setRandomGif();
-      updateMetrics();
-      setInterval(updateMetrics, 3000);
-      initVisitCounter();
-      initTrackingDots();
+    // ---- FOOTER YEAR ------------------------------------------------------
 
-      initQRCode();
-      loadHoliday();
-      loadPotterFact();
-      loadGeoInfo();
+    document.getElementById("year").textContent = new Date().getFullYear();
 
-      initRougvieMap();
-      fetchRougvies();
-      const rougvieBtn = document.getElementById("im-rougvie-btn");
-      if (rougvieBtn) rougvieBtn.addEventListener("click", handleRougvieClick);
-
-      fetchGuestbook();
-      const guestForm = document.getElementById("guestbook-form");
-      if (guestForm) guestForm.addEventListener("submit", submitGuestbook);
-
-      document.getElementById("year").textContent = new Date().getFullYear();
+    // ---- INITIALISE MAP AFTER LEAFLET LOAD --------------------------------
+    window.addEventListener("load", () => {
+      if (typeof L !== "undefined") {
+        initRougviesMap();
+      }
+      loadGuestbook();
     });
   </script>
 </body>
 </html>
-
