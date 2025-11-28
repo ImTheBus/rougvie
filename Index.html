@@ -2,8 +2,21 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>Red-Life Adventures | Retro Hub</title>
+  <title>Rougvie.com | Retro Hub</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Leaflet for Rougvies map -->
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+    crossorigin=""
+  />
+  <script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+    crossorigin=""
+  ></script>
 
   <style>
     * {
@@ -20,13 +33,13 @@
         #000020;
       color: #e6f4ff;
       min-height: 100vh;
+      cursor: url("images/cursor-sword.png") 4 4, auto; /* add this image */
     }
 
     a {
       color: #90ff7a;
       text-decoration: none;
     }
-
     a:hover {
       text-decoration: underline;
       color: #fffacd;
@@ -49,7 +62,6 @@
       filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.6));
       animation: float 18s linear infinite;
     }
-
     .sticker.star1 { top: 60%; left: -80px; animation-delay: 0s; }
     .sticker.star2 { top: 10%; right: -90px; animation-delay: 4s; }
     .sticker.star3 { top: 80%; right: -70px; animation-delay: 8s; }
@@ -58,6 +70,27 @@
       0%   { transform: translateX(0) translateY(0) rotate(0deg); }
       50%  { transform: translateX(-40px) translateY(-30px) rotate(10deg); }
       100% { transform: translateX(-260px) translateY(-60px) rotate(-15deg); }
+    }
+
+    /* extra floating d20 that cruises across the page */
+    .floating-d20 {
+      position: fixed;
+      width: 60px;
+      height: 60px;
+      right: -80px;
+      top: 20%;
+      opacity: 0.7;
+      pointer-events: none;
+      z-index: 50;
+      animation: d20-drift 28s linear infinite;
+      filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.7));
+    }
+    @keyframes d20-drift {
+      0%   { transform: translate3d(0, 0, 0) rotate(0deg); }
+      25%  { transform: translate3d(-40vw, 15vh, 0) rotate(60deg); }
+      50%  { transform: translate3d(-70vw, -5vh, 0) rotate(140deg); }
+      75%  { transform: translate3d(-20vw, -20vh, 0) rotate(240deg); }
+      100% { transform: translate3d(0, 0, 0) rotate(360deg); }
     }
 
     header {
@@ -74,8 +107,23 @@
       justify-content: space-between;
     }
 
+    .header-left {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .site-logo {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      background: #000;
+      border: 2px solid #ffcc00;
+      object-fit: cover;
+    }
+
     .site-title {
-      font-size: 2.3rem;
+      font-size: 2.1rem;
       letter-spacing: 1px;
     }
 
@@ -189,12 +237,6 @@
       color: #ff88ff;
     }
 
-    .contact-list {
-      list-style: none;
-      font-size: 0.85rem;
-      line-height: 1.6;
-    }
-
     .content-panel {
       background: #050518;
       border: 2px solid #ffcc00;
@@ -260,53 +302,10 @@
       margin-bottom: 4px;
     }
 
-    .now-playing {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 0.85rem;
-      margin-top: 4px;
-    }
-
-    .equalizer {
-      display: inline-flex;
-      gap: 2px;
-      align-items: flex-end;
-      height: 12px;
-    }
-
-    .bar {
-      width: 3px;
-      background: #90ff7a;
-      animation: bounce 0.8s infinite alternate;
-    }
-
-    .bar:nth-child(2) { animation-delay: 0.2s; }
-    .bar:nth-child(3) { animation-delay: 0.4s; }
-    .bar:nth-child(4) { animation-delay: 0.6s; }
-
-    @keyframes bounce {
-      0%   { height: 3px; }
-      100% { height: 12px; }
-    }
-
-    .rotator-frame {
-      margin-top: 8px;
-      border: 2px solid #ff88ff;
-      background: #000012;
-      padding: 4px;
-    }
-
-    .rotator-frame img {
-      width: 100%;
-      height: auto;
-      display: block;
-    }
-
     .random-gif {
       display: block;
       margin: 8px auto 2px;
-      max-width: 180px;
+      max-width: 160px;
       border: 2px solid #ffcc00;
       background: #000;
     }
@@ -355,50 +354,165 @@
       font-family: "Consolas", "Courier New", monospace;
     }
 
-    .visit-counter {
-      font-family: "Consolas", "Courier New", monospace;
-      font-size: 1rem;
-      padding: 4px 0;
+    .status-metrics div {
+      margin-bottom: 2px;
     }
 
-    .visit-counter.sparkle {
-      animation: sparkle 0.8s ease-out;
+    .visit-celebrate {
+      animation: visitPop 0.6s ease-out;
+    }
+    @keyframes visitPop {
+      0%   { transform: scale(1);   color: #e6f4ff; }
+      40%  { transform: scale(1.3); color: #fffacd; text-shadow: 0 0 8px #fffacd; }
+      100% { transform: scale(1);   color: #e6f4ff; text-shadow: none; }
     }
 
-    @keyframes sparkle {
-      0%   { text-shadow: 0 0 0px #fff; transform: scale(1); }
-      50%  { text-shadow: 0 0 14px #fff; transform: scale(1.25); }
-      100% { text-shadow: 0 0 0px #fff; transform: scale(1); }
-    }
-
-    /* 2x2 info tiles */
-    .info-grid {
+    /* Signals grid */
+    .signals-grid {
       display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 10px;
-      margin-top: 8px;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 8px;
+      margin-top: 6px;
+      font-size: 0.9rem;
     }
 
-    @media (max-width: 800px) {
-      .info-grid {
-        grid-template-columns: 1fr;
-      }
+    .signal-card {
+      border: 1px solid #ff88ff;
+      background: #080822;
+      padding: 6px;
     }
 
-    .info-tile {
-      background: #050518;
-      border: 2px solid #ffcc00;
-      padding: 10px;
-      box-shadow: 2px 2px 0 #000;
-    }
-
-    .info-tile h3 {
-      font-size: 1rem;
-      margin-bottom: 6px;
+    .signal-card h3 {
+      font-size: 0.95rem;
+      margin-bottom: 4px;
       color: #fffdc2;
       text-transform: uppercase;
       letter-spacing: 1px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.25);
+    }
+
+    #site-qr {
+      display: block;
+      max-width: 160px;
+      background: #000;
+      border: 2px solid #ffcc00;
+      margin-top: 4px;
+    }
+
+    /* IP tracking list */
+    .geo-list {
+      list-style: none;
+      font-size: 0.9rem;
+      line-height: 1.4;
+      margin-top: 4px;
+    }
+    .geo-list li::before {
+      content: "› ";
+      color: #ffcc00;
+    }
+    .geo-note {
+      margin-top: 6px;
+      font-size: 0.8rem;
+      opacity: 0.85;
+    }
+
+    /* Rougvies map */
+    #rougvie-map {
+      width: 100%;
+      height: 230px;
+      border: 1px solid #ff88ff;
+      margin-top: 6px;
+    }
+
+    .rougvie-btn {
+      font-size: 0.85rem;
+      padding: 4px 10px;
+      border-radius: 4px;
+      border: 1px solid #ffcc00;
+      background: #000020;
+      color: #e6f4ff;
+      cursor: pointer;
+      margin-top: 4px;
+    }
+    .rougvie-btn:hover {
+      background: #15153b;
+    }
+
+    /* Guestbook */
+    #guestbook-list {
+      margin-top: 6px;
+      max-height: 230px;
+      overflow-y: auto;
+      font-size: 0.85rem;
+    }
+
+    .guestbook-entry {
+      border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+      padding: 4px 0;
+    }
+
+    .guestbook-name {
+      font-weight: bold;
+    }
+
+    .guestbook-meta {
+      font-size: 0.75rem;
+      color: #b7c6ff;
+    }
+
+    .guestbook-message-text {
+      margin-top: 2px;
+    }
+
+    .guestbook-form input,
+    .guestbook-form textarea {
+      width: 100%;
+      margin-bottom: 4px;
+      padding: 4px;
+      background: #000020;
+      border: 1px solid #444;
+      color: #e6f4ff;
+      font-family: inherit;
+      font-size: 0.85rem;
+    }
+
+    .guestbook-form textarea {
+      min-height: 60px;
+      resize: vertical;
+    }
+
+    .guestbook-form button {
+      padding: 4px 10px;
+      font-size: 0.85rem;
+      border-radius: 4px;
+      border: 1px solid #ffcc00;
+      background: #000020;
+      color: #e6f4ff;
+      cursor: pointer;
+    }
+
+    .guestbook-form button:hover {
+      background: #15153b;
+    }
+
+    .guestbook-input-capsule {
+      border: 1px solid #ff88ff;
+      background: #05051c;
+      padding: 4px 6px;
+      overflow: hidden;
+      max-height: 34px;
+      transition: max-height 0.25s ease, background 0.25s ease;
+    }
+    .guestbook-input-capsule:hover {
+      max-height: 260px;
+      background: #07072a;
+    }
+    .guestbook-input-label {
+      font-size: 0.8rem;
+      opacity: 0.85;
+      pointer-events: none;
+    }
+    .guestbook-input-body {
+      margin-top: 4px;
     }
 
     footer {
@@ -413,10 +527,29 @@
     footer a {
       color: #ff88ff;
     }
+
+    /* cursor trail dots */
+    .cursor-trail-dot {
+      position: fixed;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: rgba(255, 255, 200, 0.9);
+      pointer-events: none;
+      transform: translate(-50%, -50%);
+      z-index: 9999;
+      animation: trailFade 0.4s linear forwards;
+    }
+    @keyframes trailFade {
+      0%   { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+      100% { opacity: 0; transform: translate(-50%, -50%) scale(0.2); }
+    }
   </style>
 </head>
 
 <body>
+  <img class="floating-d20" src="images/d20.gif" alt="floating d20">
+
   <div class="page-wrapper">
     <!-- Floating stickers -->
     <img class="sticker star1" src="images/glitter-star.gif" alt="sparkle">
@@ -425,25 +558,31 @@
 
     <header>
       <div class="header-top">
-        <div>
-          <div class="site-title">Red-Life Adventures</div>
-          <div style="font-size:0.9rem;">Games, dice, dioramas and mildly obsessive side projects</div>
+        <div class="header-left">
+          <img id="site-logo" class="site-logo" alt="Site logo">
+          <div>
+            <div class="site-title">Rougvie.com</div>
+            <div style="font-size:0.9rem;">
+              Books, games, dioramas, spreadsheets, Red-Life Adventures and other Rougvie side projects.
+            </div>
+          </div>
         </div>
         <div class="online-status">Dean is online</div>
       </div>
 
       <nav>
-        <a href="#about">About Me</a>
-        <a href="#shops">Shops</a>
-        <a href="#latest">Latest stuff</a>
+        <a href="#about">About</a>
+        <a href="#spaces">Spaces & shops</a>
         <a href="#signals">Signals</a>
-        <a href="#contact">Contact</a>
+        <a href="#rougvies">Rougvies map</a>
+        <a href="#guestbook">Guestbook</a>
       </nav>
     </header>
 
     <div class="marquee-wrapper">
       <marquee behavior="scroll" direction="left" scrollamount="4">
-        Welcome to my tiny corner of the internet. Featuring D and D nonsense, crunchy spreadsheets, terrain builds and far too many unfinished ideas.
+        Welcome to the Rougvie.com hub. Featuring D&D nonsense, crunchy spreadsheets, terrain builds,
+        management tools and the occasional half-finished idea.
       </marquee>
     </div>
 
@@ -453,69 +592,55 @@
         <div class="panel">
           <h2>Profile</h2>
 
-          <img class="profile-pic" src="images/profile.jpg" alt="Dean profile">
+          <img id="profile-pic" class="profile-pic" src="images/DR.jpg" alt="Dean profile picture">
 
-          <div class="profile-name">Dean / Red-Life Adventures</div>
+          <div class="profile-name">Dean Rougvie</div>
           <div class="profile-meta">
             Location: Edinburgh, Scotland<br>
-            Occupation: Managing books by day, making games and terrain at night<br>
-            Status: Trying not to start another project
+            Day job: Steering books and warehouses.<br>
+            Night job: Red-Life Adventures, BoldRabble and ImTheBus experiments.
           </div>
 
           <div class="status-box">
-            <div class="status-label">Current Status:</div>
-            <div id="status-text">
-              Loading creative chaos...
-            </div>
-          </div>
-
-          <div class="now-playing">
-            <div class="equalizer" aria-hidden="true">
-              <div class="bar"></div>
-              <div class="bar"></div>
-              <div class="bar"></div>
-              <div class="bar"></div>
-            </div>
-            <span>Now playing: background podcast about dice probabilities</span>
-          </div>
-
-          <div class="rotator-frame">
-            <img id="photo-rotator" src="images/gallery1.jpg" alt="Workshop photo">
+            <div class="status-label">Current status:</div>
+            <div id="status-text">Loading creative chaos...</div>
           </div>
         </div>
 
         <div class="panel" id="contact">
-          <h2>Contact</h2>
-          <ul class="contact-list">
-            <li><strong>Email:</strong> <a href="mailto:you@red-life-adventures.co.uk">you@red-life-adventures.co.uk</a></li>
-            <li><strong>Instagram DMs:</strong> <a href="https://www.instagram.com/boldrabble/" target="_blank" rel="noopener">BoldRabble</a></li>
-            <li><strong>Preferred topics:</strong> D and D, terrain, spreadsheets, weird ideas</li>
+          <h2>Contact & metrics</h2>
+          <ul style="list-style:none; font-size:0.85rem; line-height:1.6; margin-bottom:6px;">
+            <li><strong>Email:</strong> <a href="mailto:you@rougvie.com">you@rougvie.com</a></li>
+            <li><strong>Instagram:</strong> <a href="https://www.instagram.com/boldrabble/" target="_blank" rel="noopener">BoldRabble</a></li>
+            <li><strong>Topics:</strong> D&D, terrain, spreadsheets, weird ideas, warehouses.</li>
           </ul>
 
           <div class="status-metrics">
             <div>sys.uptime: <span id="uptime-value">0000s</span></div>
-            <div>sys.ping: <span id="ping-value">42</span> ms</div>
-            <div>sys.mood: <span id="mood-value">OK</span></div>
-            <div>uplink.latency: <span id="ping-readout">measuring...</span></div>
+            <div>net.ping: <span id="ping-value">42</span> ms</div>
+            <div>cache.mood: <span id="mood-value">OK</span></div>
+            <div>visits.hits: <span id="visit-counter">...</span></div>
+            <div>local.time: <span id="localtime-value">--:--:--</span></div>
           </div>
         </div>
 
-        <div class="panel">
-          <h2>Visitor Counter</h2>
-          <div id="visit-counter" class="visit-counter">Loading...</div>
+        <div class="panel" id="ipinfo">
+          <h2>
+            Tracking user<span id="tracking-dots">.</span>
+          </h2>
+          <ul id="geo-list" class="geo-list">
+            <li>Initialising IP-based lookup...</li>
+          </ul>
+          <p class="geo-note">
+            This is all guessed from your IP address. If you are on a VPN, shared Wi-Fi, company network
+            or hacking the Gibson like 90s-era Jonny Lee Miller, the details will be wildly wrong.
+          </p>
         </div>
 
         <div class="panel">
-          <h2>Your approximate location</h2>
-          <div id="geo-info">
-            Looking up a rough location. This is based on IP only and not exact.
-          </div>
-        </div>
-
-        <div class="panel">
-          <h2>Friends and Links</h2>
+          <h2>Friends & links</h2>
           <p style="font-size:0.85rem; margin-bottom:4px;">
-            Coming soon: collaborator list, cool makers and creators who inspire me.
+            Coming soon: collaborators and other people who put up with my projects.
           </p>
           <p style="font-size:0.8rem; opacity:0.8;">
             If we have worked together and you want a link here, give me a nudge.
@@ -526,199 +651,164 @@
       <!-- Right column -->
       <section>
         <div class="content-panel" id="about">
-          <h2>About Me</h2>
+          <h2>About this hub</h2>
           <p>
-            I am Dean, the person behind Red-Life Adventures and BoldRabble. I split my time between books, tabletop games, terrain building and digital side projects. Most of what I make starts as an experiment and occasionally escapes into the world as something people can actually use.
+            This is a simple retro hub for the Rougvie multiverse: Red-Life Adventures (RPG stuff),
+            BoldRabble (terrain and resin), ImTheBus (management tools) and whatever else is in progress.
           </p>
           <p>
-            This site is a simple hub that pulls my different projects into one place: print on demand designs, 3D printable tools for D and D, RPG supplements and the workshop builds that show up on Instagram. Expect a mix of useful things, half formed ideas and the occasional glitch.
+            Most of what shows up here started as an experiment. Some of it became products, some of it is
+            just here because it amused me. Expect useful tools, odd builds and the occasional glitch.
           </p>
 
-          <img id="random-gif" class="random-gif" src="images/placeholder.gif" alt="Random gif">
+          <img id="random-gif" class="random-gif" src="images/gif-retro-1.gif" alt="Retro gif">
           <div class="gif-caption">Reload to see what the system spits out next.</div>
         </div>
 
-        <div class="content-panel" id="shops">
-          <h2>Shops and Projects</h2>
-          <p>
-            Here is where you can actually get hold of the things I make.
-          </p>
+        <div class="content-panel" id="spaces">
+          <h2>Spaces & shops</h2>
+          <p>Where the different Rougvie projects live on the wider internet.</p>
 
           <div class="shop-grid">
             <article class="shop-card">
-              <h3>Redbubble Store</h3>
-              <p>Spreadsheet jokes, retro pixels and other nerdy designs on mugs, shirts and more.</p>
+              <h3>Rougvie.com</h3>
+              <p>This hub, tying together the projects and experiments in one place.</p>
+              <p><a href="#about">You are already here.</a></p>
+            </article>
+
+            <article class="shop-card">
+              <h3>Red-Life Adventures (RPG)</h3>
+              <p>Adventures, tables and supplements on DriveThruRPG under the Red-Life Adventures banner.</p>
+              <p><a href="https://www.drivethrurpg.com/browse/pub/23100/RedLife-Adventures" target="_blank" rel="noopener">Open Red-Life on DriveThruRPG</a></p>
+            </article>
+
+            <article class="shop-card">
+              <h3>ImTheBus tools</h3>
+              <p>Management and leadership web tools, 2x2s and experiments.</p>
+              <p><a href="https://imthebus.co.uk" target="_blank" rel="noopener">Visit imthebus.co.uk</a></p>
+            </article>
+
+            <article class="shop-card">
+              <h3>Redbubble – ImTheBus</h3>
+              <p>Spreadsheet jokes, retro pixels and nerdy designs on mugs, shirts and more.</p>
               <p><a href="https://www.redbubble.com/people/imthebus/shop" target="_blank" rel="noopener">Visit Redbubble shop</a></p>
             </article>
 
             <article class="shop-card">
-              <h3>Etsy 3D Prints</h3>
-              <p>Spell slot trackers, counters and 3D printable tools for tabletop games.</p>
-              <p><a href="https://www.etsy.com/shop/RedLife3D" target="_blank" rel="noopener">Visit Etsy shop</a></p>
-            </article>
-
-            <article class="shop-card">
-              <h3>DriveThruRPG Titles</h3>
-              <p>Adventures, tables and supplements under the Red-Life Adventures banner.</p>
-              <p><a href="https://www.drivethrurpg.com/" target="_blank" rel="noopener">Find me on DriveThruRPG</a></p>
+              <h3>Etsy – RedLife3D</h3>
+              <p>Spell slot trackers, counters and printable tools for D&D and other games.</p>
+              <p><a href="https://www.etsy.com/uk/shop/RedLife3D" target="_blank" rel="noopener">Visit Etsy shop</a></p>
             </article>
 
             <article class="shop-card">
               <h3>BoldRabble on Instagram</h3>
-              <p>Diorama builds, resin experiments and behind the scenes workshop chaos.</p>
+              <p>Diorama builds, resin experiments and behind-the-scenes workshop chaos.</p>
               <p><a href="https://www.instagram.com/boldrabble/" target="_blank" rel="noopener">Watch the reels</a></p>
             </article>
-
-            <article class="shop-card">
-              <h3>ImTheBus Tools</h3>
-              <p>Management and leadership web tools and experiments.</p>
-              <p><a href="https://imthebus.co.uk" target="_blank" rel="noopener">Visit imthebus.co.uk</a></p>
-            </article>
           </div>
         </div>
 
-        <div class="content-panel" id="latest">
-          <h2>Latest stuff</h2>
-          <p style="font-size:0.9rem;">
-            Manual hub of what I have put out recently. Quick way to see where new things landed.
-          </p>
-          <div class="latest-grid">
-            <div class="latest-card">
-              <img class="latest-thumb" src="images/latest-instagram.jpg" alt="Latest Instagram">
-              <strong>New reel on BoldRabble</strong>
-              <span>Terrain build timelapse and resin experiments.</span><br>
-              <a href="https://www.instagram.com/boldrabble/" target="_blank" rel="noopener">Open on Instagram</a>
-            </div>
-            <div class="latest-card">
-              <img class="latest-thumb" src="images/latest-drivethru.jpg" alt="Latest RPG title">
-              <strong>New title on DriveThruRPG</strong>
-              <span>Fresh table, adventure or tool from Red-Life Adventures.</span><br>
-              <a href="https://www.drivethrurpg.com/" target="_blank" rel="noopener">View on DriveThruRPG</a>
-            </div>
-            <div class="latest-card">
-              <img class="latest-thumb" src="images/latest-imthebus.jpg" alt="Latest tool">
-              <strong>Updated ImTheBus Tool</strong>
-              <span>Latest tweak or new experiment in the management toolset.</span><br>
-              <a href="https://imthebus.co.uk" target="_blank" rel="noopener">Open tool hub</a>
-            </div>
-          </div>
-        </div>
-
-        <!-- 2x2 info tiles -->
         <div class="content-panel" id="signals">
           <h2>Signals from the multiverse</h2>
-
-          <div class="info-grid">
-            <!-- Calendar tile -->
-            <section class="info-tile" id="calendar">
+          <div class="signals-grid">
+            <div class="signal-card">
               <h3>Today in the calendar</h3>
-              <div id="holiday-status">Checking holidays...</div>
-            </section>
+              <div id="holiday-status">Checking the next public holiday...</div>
+            </div>
 
-            <!-- Potter lore tile -->
-            <section class="info-tile" id="magic">
+            <div class="signal-card">
               <h3>Random Potter lore</h3>
               <div id="potter-fact">Summoning magical trivia...</div>
-            </section>
+            </div>
 
-            <!-- Bored API tile -->
-            <section class="info-tile">
-              <h3>Something to do</h3>
-
-              <div style="font-size:0.8rem; margin-bottom:6px;">
-                Tune the vibe, then hit the button.
-              </div>
-
-              <div style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:6px;">
-                <select id="bored-type" style="flex:1; min-width:140px;">
-                  <option value="">Any type</option>
-                  <option value="education">Education</option>
-                  <option value="recreational">Recreational</option>
-                  <option value="social">Social</option>
-                  <option value="charity">Charity</option>
-                  <option value="cooking">Cooking</option>
-                  <option value="relaxation">Relaxation</option>
-                  <option value="busywork">Busywork</option>
-                </select>
-
-                <select id="bored-participants" style="width:110px;">
-                  <option value="">Any #</option>
-                  <option value="1">Solo</option>
-                  <option value="2">2</option>
-                  <option value="3">3</option>
-                  <option value="4">4</option>
-                  <option value="5">5</option>
-                  <option value="6">6</option>
-                  <option value="8">8</option>
-                </select>
-              </div>
-
-              <button id="bored-button" type="button" style="
-                  font-size:0.85rem;
-                  padding:4px 10px;
-                  margin-bottom:6px;
-                  border:1px solid #ffcc00;
-                  background:#000018;
-                  color:#e6f4ff;
-                  cursor:pointer;
-                ">
-                Roll an activity
-              </button>
-
-              <div id="bored-activity">Finding you a distraction...</div>
-            </section>
-
-            <!-- QR tile -->
-            <section class="info-tile">
+            <div class="signal-card">
               <h3>Scan to visit later</h3>
-              <p style="font-size:0.9rem; margin-bottom:6px;">
-                Point a camera at this and keep the portal handy.
+              <p style="font-size:0.85rem;">
+                Point a camera at this to bookmark the hub.
               </p>
               <img id="site-qr" alt="QR code for this site">
-            </section>
+            </div>
           </div>
         </div>
 
-        <div class="content-panel" id="gallery">
-          <h2>Projects and experiments</h2>
-          <p>
-            Highlights from ongoing and recent projects:
+        <div class="content-panel" id="rougvies">
+          <h2>Rougvies of the world</h2>
+          <p style="font-size:0.9rem;">
+            I am a Rougvie, but not all Rougvies. If you are a Rougvie who found this site, click the button
+            below to check in and add yourself to the map for future Rougvies to see.
           </p>
-          <ul style="margin-left:18px; font-size:0.95rem; line-height:1.5;">
-            <li>3D printed spell slot trackers for 5e spellcasters.</li>
-            <li>Diorama builds with foam, resin and texture paste.</li>
-            <li>RPG supplements like tavern and temple rumor tables.</li>
-            <li>Digital tools and dashboards to help organise campaigns and projects.</li>
-          </ul>
-          <p style="margin-top:6px; font-size:0.85rem; opacity:0.85;">
-            At some point this section will become a proper gallery. For now, follow the links above to see what is actually live.
-          </p>
+          <button id="im-rougvie-btn" type="button" class="rougvie-btn">
+            I am a Rougvie – add me
+          </button>
+          <div id="rougvie-message" style="font-size:0.85rem; margin-top:4px;"></div>
+          <div id="rougvie-map"></div>
         </div>
 
-        <div class="content-panel">
+        <div class="content-panel" id="guestbook">
           <h2>Guestbook</h2>
           <p style="font-size:0.9rem; margin-bottom:6px;">
-            True to old internet tradition, this is where a guestbook will go.
+            Old-school guestbook. Say hi so future Dean knows who passed through.
           </p>
-          <p style="font-size:0.85rem; opacity:0.8;">
-            Until then, feel free to say hi through Instagram or email instead of trying to remember your old Myspace login details.
-          </p>
+
+          <div class="guestbook-input-capsule">
+            <div class="guestbook-input-label">
+              Hover to expand and sign the guestbook.
+            </div>
+            <div class="guestbook-input-body">
+              <form class="guestbook-form" id="guestbook-form">
+                <input type="text" id="guestbook-name" placeholder="Name (optional)">
+                <input type="text" id="guestbook-city" placeholder="City (optional)">
+                <textarea id="guestbook-message-input" placeholder="Message"></textarea>
+                <button type="submit">Sign guestbook</button>
+              </form>
+              <div id="guestbook-message" style="font-size:0.8rem; margin-top:2px;"></div>
+            </div>
+          </div>
+
+          <div id="guestbook-list"></div>
         </div>
       </section>
     </main>
 
     <footer>
-      <div>Red-Life Adventures &copy; <span id="year"></span>. Powered by caffeine, polyhedral dice and nostalgia.</div>
+      <div>Rougvie.com &copy; <span id="year"></span>. Powered by caffeine, polyhedral dice and nostalgia.</div>
       <div>Site look intentionally retro. If something flickers, that just means it is authentic.</div>
     </footer>
   </div>
 
   <script>
-    function randomFrom(list) {
-      return list[Math.floor(Math.random() * list.length)];
+    // BASIC CONFIG
+    // For the logo / profile you have two easy options:
+    // 1) Put DR.jpg and BoldRabble.png in /images and leave these as-is.
+    // 2) Swap these lines to direct Google Drive file URLs (not the folder URL),
+    //    e.g. "https://drive.google.com/uc?export=view&id=FILE_ID_HERE".
+    const PROFILE_IMG_URL = "images/DR.jpg";
+    const LOGO_IMG_URL    = "images/BoldRabble.png";
+
+    const IPSTACK_KEY = "486031badb95bb1f7e9145e73a33686e";
+
+    const ROUVGIES_API_URL  =
+      "https://script.google.com/macros/s/AKfycbzhSzjmmpyZyklEKFDbebcnHAOMI73QdDy7rgWxit4XvCc_BPDcAxhCHen24QZr2SXZ/exec";
+    const GUESTBOOK_API_URL =
+      "https://script.google.com/macros/s/AKfycbzmAAURMWxt9OfZP4C5aJrFLF0WWRhE7yibp01-E_5wDDTIkjwsePJCy87LomCF-Iw/exec";
+
+    const SITE_URL_FOR_QR = "https://rougvie.com";
+
+    function randomFrom(arr) {
+      return arr[Math.floor(Math.random() * arr.length)];
     }
 
-    // Animated status text
+    // Cursor trail
+    document.addEventListener("mousemove", (e) => {
+      const dot = document.createElement("div");
+      dot.className = "cursor-trail-dot";
+      dot.style.left = e.clientX + "px";
+      dot.style.top = e.clientY + "px";
+      document.body.appendChild(dot);
+      setTimeout(() => dot.remove(), 400);
+    });
+
+    // Status messages
     const statuses = [
       "Painting tiny rocks and pretending it is productive.",
       "Writing encounter tables instead of finishing campaigns.",
@@ -730,132 +820,110 @@
     function setStatus() {
       const el = document.getElementById("status-text");
       if (!el) return;
-      const pick = randomFrom(statuses);
-      el.textContent = pick;
+      el.textContent = randomFrom(statuses);
     }
 
-    // Rotating photos
-    const photos = [
-      "images/gallery1.jpg",
-      "images/gallery2.jpg",
-      "images/gallery3.jpg"
-    ];
-
-    function setRandomPhoto() {
-      const photoEl = document.getElementById("photo-rotator");
-      if (!photoEl) return;
-      const pick = randomFrom(photos);
-      photoEl.src = pick;
-    }
-
-    // Random cat gif from CATAAS
-    function loadRandomGif() {
-      const gifEl = document.getElementById("random-gif");
-      if (!gifEl) return;
-
-      const gifUrls = [
-        "https://cataas.com/cat/gif",
-        "https://cataas.com/cat/cute",
-        "https://cataas.com/cat/funny",
-        "https://cataas.com/cat/gif?type=or",
-        "https://cataas.com/cat/gif/sleepy",
-        "https://cataas.com/cat/gif/play"
+    // Random gif
+    function setRandomGif() {
+      const gifs = [
+        "images/gif-retro-1.gif",
+        "images/gif-retro-2.gif",
+        "images/gif-retro-3.gif"
       ];
-
-      const base = randomFrom(gifUrls);
-      const urlWithTs = base + (base.includes("?") ? "&" : "?") + "ts=" + Date.now();
-      gifEl.src = urlWithTs;
+      const gifEl = document.getElementById("random-gif");
+      if (gifEl) gifEl.src = randomFrom(gifs);
     }
 
-    // Fake system metrics
-    function startSystemMetrics() {
+    // System metrics
+    let uptime = 0;
+    const moods = ["OK", "OK", "OK", "IDLE", "BUILDING", "LOADING"];
+
+    function updateMetrics() {
       const pingEl = document.getElementById("ping-value");
       const uptimeEl = document.getElementById("uptime-value");
       const moodEl = document.getElementById("mood-value");
-      if (!pingEl || !uptimeEl || !moodEl) return;
+      const timeEl = document.getElementById("localtime-value");
 
-      let uptime = 0;
-      const moods = ["OK", "OK", "OK", "IDLE", "BUILDING", "LOADING"];
+      uptime += Math.floor(Math.random() * 4) + 1;
+      if (uptimeEl) uptimeEl.textContent = String(uptime).padStart(4, "0") + "s";
 
-      function updateMetrics() {
-        uptime += Math.floor(Math.random() * 4) + 1;
-        uptimeEl.textContent = String(uptime).padStart(4, "0") + "s";
+      const ping = 15 + Math.floor(Math.random() * 80);
+      if (pingEl) pingEl.textContent = ping;
 
-        const ping = 15 + Math.floor(Math.random() * 80);
-        pingEl.textContent = ping;
+      if (moodEl) moodEl.textContent = randomFrom(moods);
 
-        const moodPick = moods[Math.floor(Math.random() * moods.length)];
-        moodEl.textContent = moodPick;
-      }
-
-      updateMetrics();
-      setInterval(updateMetrics, 3000);
+      const now = new Date();
+      if (timeEl) timeEl.textContent = now.toLocaleTimeString();
     }
 
-    // Real ping
-    async function measurePing() {
-      const el = document.getElementById("ping-readout");
+    // Visit counter
+    async function initVisitCounter() {
+      const el = document.getElementById("visit-counter");
       if (!el) return;
-
-      const url = "favicon.ico";
-      const start = performance.now();
       try {
-        await fetch(url, { method: "HEAD", cache: "no-store" });
-        const ms = Math.round(performance.now() - start);
-        el.textContent = "~" + ms + " ms";
+        const resp = await fetch("https://api.countapi.xyz/hit/rougvie.com/retro-hub");
+        const data = await resp.json();
+        el.textContent = data.value;
+        if (data.value % 10 === 0) {
+          el.classList.remove("visit-celebrate");
+          // force reflow
+          void el.offsetWidth;
+          el.classList.add("visit-celebrate");
+        }
       } catch (err) {
-        const ms = Math.round(performance.now() - start);
-        el.textContent = "~" + ms + " ms (estimated)";
+        console.error("CountAPI error", err);
+        el.textContent = "offline";
       }
     }
 
-    // Next public holiday worldwide using Nager.Date
+    // Tracking dots for IP heading
+    function initTrackingDots() {
+      const el = document.getElementById("tracking-dots");
+      if (!el) return;
+      const states = [".", "..", "..."];
+      let i = 0;
+      setInterval(() => {
+        i = (i + 1) % states.length;
+        el.textContent = states[i];
+      }, 600);
+    }
+
+    // Holiday
     async function loadHoliday() {
       const el = document.getElementById("holiday-status");
       if (!el) return;
 
-      const base = "https://date.nager.at/api/v3";
-
       try {
-        const resp = await fetch(base + "/NextPublicHolidaysWorldwide");
-        if (!resp.ok) throw new Error("Holiday API error");
+        const resp = await fetch("https://date.nager.at/api/v3/NextPublicHolidaysWorldwide");
+        if (!resp.ok) throw new Error("holiday error");
         const list = await resp.json();
-
         if (!Array.isArray(list) || !list.length) {
-          el.textContent = "No holiday information available right now.";
+          el.textContent = "No holiday data available.";
           return;
         }
-
         const todayStr = new Date().toISOString().slice(0, 10);
-
         const next = list.reduce((best, h) => {
           if (h.date < todayStr) return best;
           if (!best) return h;
           return h.date < best.date ? h : best;
         }, null);
-
         if (!next) {
           el.textContent = "No upcoming holidays found.";
           return;
         }
-
         el.textContent =
           "Next public holiday anywhere: " +
           next.localName +
-          " (" +
-          next.name +
-          ") in " +
+          " (" + next.name + ") in " +
           next.countryCode +
-          " on " +
-          next.date +
-          ".";
+          " on " + next.date + ".";
       } catch (err) {
         console.error("Holiday error", err);
-        el.textContent = "Holiday service unavailable.";
+        el.textContent = "Holiday service is not responding.";
       }
     }
 
-    // PotterDB fact with richer output
+    // PotterDB
     async function loadPotterFact() {
       const el = document.getElementById("potter-fact");
       if (!el) return;
@@ -879,21 +947,13 @@
 
       try {
         const resp = await fetch(url);
-        if (!resp.ok) throw new Error("PotterDB error");
+        if (!resp.ok) throw new Error("Potter error");
         const data = await resp.json();
         const item = data.data && data.data[0];
         if (!item) throw new Error("No Potter data");
-
         const a = item.attributes || {};
-
-        let html =
-          "<strong>" +
-          pick.label +
-          ":</strong> " +
-          (a.name || a.slug || "(no name)");
-
+        let html = "<strong>" + pick.label + ":</strong> " + (a.name || a.slug || "(no name)");
         const bits = [];
-
         if (pick.type === "spells") {
           if (a.incantation) bits.push("Incantation: " + a.incantation);
           if (a.category) bits.push("Category: " + a.category);
@@ -909,241 +969,298 @@
           if (a.characteristics) bits.push("Characteristics: " + a.characteristics);
           if (a.difficulty) bits.push("Difficulty: " + a.difficulty);
         }
-
-        if (a.description && bits.length === 0) {
-          bits.push(a.description);
-        }
-
-        if (bits.length) {
-          html += "<br>" + bits.join("<br>");
-        }
-
+        if (a.description && !bits.length) bits.push(a.description);
+        if (bits.length) html += "<br>" + bits.join("<br>");
         el.innerHTML = html;
       } catch (err) {
         console.error("Potter error", err);
-        el.textContent = "The Ministry of Magic is not responding right now.";
+        el.textContent = "The Ministry of Magic is not sending data right now.";
       }
     }
 
-    // Bored API (App Brewery) with filters
-    async function loadBoredActivity(options = {}) {
-      const el = document.getElementById("bored-activity");
-      if (!el) return;
-
-      const typeSel = document.getElementById("bored-type");
-      const partSel = document.getElementById("bored-participants");
-
-      const type = options.type ?? (typeSel ? typeSel.value : "");
-      const participants = options.participants ?? (partSel ? partSel.value : "");
-
-      const backupIdeas = [
-        "Sort your dice by how often they have betrayed you.",
-        "Sketch a tiny dungeon room on a sticky note.",
-        "Pick one shelf and tidy only that shelf.",
-        "Write three adventure hooks set in your own street.",
-        "Take a five minute walk without your phone."
-      ];
-
-      function showFallback(message) {
-        const idea = randomFrom(backupIdeas);
-        el.innerHTML = (message ? message + "<br>" : "") + idea;
-      }
-
-      try {
-        let url = "";
-        let expectArray = false;
-
-        if (!type && !participants) {
-          url = "https://bored-api.appbrewery.com/random";
-          expectArray = false;
-        } else {
-          const params = new URLSearchParams();
-          if (type) params.set("type", type);
-          if (participants) params.set("participants", participants);
-          url = "https://bored-api.appbrewery.com/filter?" + params.toString();
-          expectArray = true;
-        }
-
-        el.textContent = "Rolling an activity...";
-
-        const resp = await fetch(url);
-        if (!resp.ok) throw new Error("Bored API error: " + resp.status);
-
-        const data = await resp.json();
-
-        let activity;
-        if (expectArray) {
-          if (!Array.isArray(data) || data.length === 0) {
-            showFallback("No activities matched those settings. Try changing the filters.");
-            return;
-          }
-          activity = randomFrom(data);
-        } else {
-          activity = data;
-        }
-
-        if (!activity || !activity.activity) {
-          showFallback();
-          return;
-        }
-
-        const a = activity;
-
-        let html = "<strong>" + a.activity + "</strong>";
-
-        const metaLines = [];
-
-        if (a.type) metaLines.push("Type: " + a.type);
-        if (typeof a.participants === "number") {
-          metaLines.push("Participants: " + a.participants);
-        }
-        if (typeof a.price === "number") {
-          const priceBand =
-            a.price === 0 ? "Free" :
-            a.price < 0.2 ? "Very low cost" :
-            a.price < 0.5 ? "Low cost" :
-            "Paid";
-          metaLines.push("Cost: " + priceBand);
-        }
-        if (a.duration) metaLines.push("Duration: " + a.duration);
-        if (a.accessibility) metaLines.push("Accessibility: " + a.accessibility);
-        if (typeof a.kidFriendly === "boolean") {
-          metaLines.push("Kid friendly: " + (a.kidFriendly ? "Yes" : "No"));
-        }
-
-        if (metaLines.length) {
-          html += "<br>" + metaLines.join(" | ");
-        }
-
-        if (a.link) {
-          html +=
-            '<br><a href="' +
-            a.link +
-            '" target="_blank" rel="noopener">Open link</a>';
-        }
-
-        el.innerHTML = html;
-      } catch (err) {
-        console.error("Bored API error", err);
-        showFallback("The activity service is having a moment.");
-      }
-    }
-
-    // CountAPI visitor counter (Miles Hilliard)
-    async function loadVisitCounter() {
-      const el = document.getElementById("visit-counter");
-      if (!el) return;
-
-      const key = "redlife_imthebus_home_v1";
-      const url =
-        "https://countapi.mileshilliard.com/api/v1/hit/" +
-        encodeURIComponent(key);
-
-      try {
-        el.textContent = "Counting visitors...";
-
-        const resp = await fetch(url);
-        if (!resp.ok) throw new Error("CountAPI error: " + resp.status);
-
-        const data = await resp.json();
-        const value = parseInt(data.value, 10) || 0;
-
-        el.textContent = "Page hits: " + value;
-
-        if (value % 10 === 0 && value !== 0) {
-          el.classList.add("sparkle");
-          setTimeout(() => el.classList.remove("sparkle"), 900);
-        }
-      } catch (err) {
-        console.error("Counter error", err);
-        el.textContent = "Counter offline.";
-      }
-    }
-
-    // QR code for this site
-    function loadQrCode() {
+    // QR code
+    function initQRCode() {
       const img = document.getElementById("site-qr");
       if (!img) return;
-
-      const currentUrl = window.location.href;
-      const encoded = encodeURIComponent(currentUrl);
-      img.src = "https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=" + encoded;
+      const encoded = encodeURIComponent(SITE_URL_FOR_QR);
+      img.src = "https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=" + encoded;
     }
 
-    // IP2Location
-    async function loadGeoInfo() {
-      const el = document.getElementById("geo-info");
-      if (!el) return;
+    // IPSTACK geo
+    let lastGeoLat = null;
+    let lastGeoLon = null;
+    let lastGeoCity = null;
+    let lastGeoCountry = null;
 
-      const apiKey = "YOUR_IP2LOCATION_API_KEY_HERE"; // replace with your key
-      if (!apiKey || apiKey.startsWith("YOUR_")) {
-        el.textContent = "Location lookup not configured yet.";
+    async function loadGeoInfo() {
+      const listEl = document.getElementById("geo-list");
+      if (!listEl) return;
+
+      listEl.innerHTML = "<li>Contacting ipstack...</li>";
+
+      try {
+        const url = "https://api.ipstack.com/check?access_key=" + IPSTACK_KEY + "&output=json";
+        const resp = await fetch(url);
+        if (!resp.ok) throw new Error("ipstack error " + resp.status);
+        const data = await resp.json();
+
+        lastGeoLat = data.latitude;
+        lastGeoLon = data.longitude;
+        lastGeoCity = data.city;
+        lastGeoCountry = data.country_name;
+
+        const pieces = [];
+
+        if (data.city || data.region_name || data.country_name) {
+          pieces.push(
+            "Approx location: " +
+            [data.city, data.region_name, data.country_name].filter(Boolean).join(", ") +
+            (data.zip ? " (" + data.zip + ")" : "")
+          );
+        }
+
+        const tz = data.time_zone || {};
+        if (tz.id) pieces.push("Time zone (ish): " + tz.id);
+
+        const conn = data.connection || {};
+        if (conn.isp || conn.organization) {
+          pieces.push(
+            "Seen as: " +
+            [conn.isp, conn.organization].filter(Boolean).join(" – ")
+          );
+        }
+
+        const ip = data.ip || data.ipv4 || "";
+        if (ip) pieces.push("IP fingerprint: " + ip);
+
+        if (!pieces.length) {
+          pieces.push("No useful data came back from the IP lookup.");
+        }
+
+        listEl.innerHTML = "";
+        pieces.forEach(text => {
+          const li = document.createElement("li");
+          li.textContent = text;
+          listEl.appendChild(li);
+        });
+      } catch (err) {
+        console.error("Geo error", err);
+        listEl.innerHTML = "<li>IP lookup failed. Assume Earth and carry on.</li>";
+      }
+    }
+
+    // Rougvies map
+    let rougvieMap;
+    let rougvieLayer;
+
+    function initRougvieMap() {
+      const container = document.getElementById("rougvie-map");
+      if (!container) return;
+      rougvieMap = L.map("rougvie-map", { zoomControl: false }).setView([20, 0], 2);
+      L.tileLayer(
+        "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
+        {
+          attribution:
+            '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors ' +
+            '&copy; <a href="https://carto.com/attributions">CARTO</a>',
+          maxZoom: 19
+        }
+      ).addTo(rougvieMap);
+      rougvieLayer = L.layerGroup().addTo(rougvieMap);
+    }
+
+    function renderRougvieMap(entries) {
+      if (!rougvieMap || !rougvieLayer) return;
+
+      rougvieLayer.clearLayers();
+      if (!entries || !entries.length) {
+        rougvieMap.setView([20, 0], 2);
         return;
       }
 
-      const url = "https://api.ip2location.io/?key=" + apiKey + "&format=json";
+      const latLngs = [];
 
-      try {
-        const resp = await fetch(url);
-        if (!resp.ok) throw new Error("Geo API error");
-        const data = await resp.json();
+      entries.forEach(row => {
+        if (row.lat == null || row.lon == null) return;
+        const lat = Number(row.lat);
+        const lon = Number(row.lon);
+        if (Number.isNaN(lat) || Number.isNaN(lon)) return;
 
-        const parts = [];
-        if (data.city) parts.push(data.city);
-        if (data.region_name) parts.push(data.region_name);
-        if (data.country_name) parts.push(data.country_name);
+        latLngs.push([lat, lon]);
 
-        let html = "";
-        if (parts.length) {
-          html += "<p>You appear to be in " + parts.join(", ") + ".</p>";
-        }
+        const label =
+          (row.first_name || "Unknown") +
+          (row.city || row.country ? " – " + [row.city, row.country].filter(Boolean).join(", ") : "");
 
-        if (data.time_zone) {
-          html += "<p>Time zone: " + data.time_zone + "</p>";
-        }
-        if (data.ip) {
-          html += "<p>IP (as seen by this site): " + data.ip + "</p>";
-        }
+        L.circleMarker([lat, lon], {
+          radius: 5,
+          color: "#36ff6f",
+          fillColor: "#36ff6f",
+          fillOpacity: 0.9
+        }).addTo(rougvieLayer).bindPopup(label);
+      });
 
-        if (!html) {
-          html = "Could not determine your location.";
-        }
-
-        html += "<p>This is a rough guess based on IP only.</p>";
-        el.innerHTML = html;
-      } catch (err) {
-        console.error("Geo error", err);
-        el.textContent = "Location lookup failed.";
+      if (latLngs.length === 1) {
+        rougvieMap.setView(latLngs[0], 5);
+      } else if (latLngs.length > 1) {
+        rougvieMap.fitBounds(latLngs, { padding: [20, 20] });
       }
     }
 
-    document.addEventListener("DOMContentLoaded", () => {
-      setStatus();
-      setInterval(setStatus, 12000);
+    async function fetchRougvies() {
+      const msg = document.getElementById("rougvie-message");
+      try {
+        const resp = await fetch(ROUVGIES_API_URL);
+        const data = await resp.json();
+        renderRougvieMap(data);
+        if (msg) {
+          msg.textContent = data.length
+            ? "Currently tracking " + data.length + " Rougvie visit(s)."
+            : "No Rougvies added yet. You might be the first.";
+        }
+      } catch (err) {
+        console.error("Rougvie fetch error", err);
+        if (msg) msg.textContent = "Could not load Rougvies right now.";
+      }
+    }
 
-      setRandomPhoto();
-      setInterval(setRandomPhoto, 15000);
+    async function handleRougvieClick() {
+      const msg = document.getElementById("rougvie-message");
 
-      loadRandomGif();
-
-      startSystemMetrics();
-      measurePing();
-
-      loadHoliday();
-      loadPotterFact();
-
-      // Bored API
-      loadBoredActivity();
-      const boredButton = document.getElementById("bored-button");
-      if (boredButton) {
-        boredButton.addEventListener("click", () => {
-          loadBoredActivity();
-        });
+      const firstName = window.prompt("What is your first name?");
+      if (!firstName || !firstName.trim()) {
+        if (msg) msg.textContent = "No worries, you can add yourself later.";
+        return;
       }
 
-      loadVisitCounter();
-      loadQrCode();
+      if (lastGeoLat == null || lastGeoLon == null) {
+        if (msg) msg.textContent =
+          "I cannot see an approximate location yet. Reload the page then try again.";
+        return;
+      }
+
+      const payload = {
+        first_name: firstName.trim(),
+        city: lastGeoCity || "",
+        country: lastGeoCountry || "",
+        lat: lastGeoLat,
+        lon: lastGeoLon
+      };
+
+      try {
+        await fetch(ROUVGIES_API_URL, {
+          method: "POST",
+          body: JSON.stringify(payload)
+        });
+        if (msg) msg.textContent = "You have been added to the Rougvie map.";
+        fetchRougvies();
+      } catch (err) {
+        console.error("Rougvie add error", err);
+        if (msg) msg.textContent = "Could not add you right now.";
+      }
+    }
+
+    // Guestbook
+    async function fetchGuestbook() {
+      const listEl = document.getElementById("guestbook-list");
+      if (!listEl) return;
+
+      listEl.innerHTML = "<p>Loading guestbook...</p>";
+
+      try {
+        const resp = await fetch(GUESTBOOK_API_URL);
+        const data = await resp.json();
+        if (!Array.isArray(data) || !data.length) {
+          listEl.innerHTML = "<p>No messages yet, be the first.</p>";
+          return;
+        }
+
+        listEl.innerHTML = "";
+        data.slice().reverse().forEach(entry => {
+          const wrap = document.createElement("div");
+          wrap.className = "guestbook-entry";
+
+          const name = entry.name || "Anonymous";
+          const city = entry.city || "";
+          const ts = entry.timestamp ? new Date(entry.timestamp) : null;
+
+          const meta = [];
+          if (city) meta.push(city);
+          if (ts && !isNaN(ts)) meta.push(ts.toLocaleString());
+
+          wrap.innerHTML =
+            '<div class="guestbook-name">' + name + "</div>" +
+            (meta.length ? '<div class="guestbook-meta">' + meta.join(" | ") + "</div>" : "") +
+            '<div class="guestbook-message-text">' + (entry.message || "") + "</div>";
+
+          listEl.appendChild(wrap);
+        });
+      } catch (err) {
+        console.error("Guestbook fetch error", err);
+        listEl.innerHTML = "<p>Could not load guestbook right now.</p>";
+      }
+    }
+
+    async function submitGuestbook(event) {
+      event.preventDefault();
+      const nameEl = document.getElementById("guestbook-name");
+      const cityEl = document.getElementById("guestbook-city");
+      const msgEl = document.getElementById("guestbook-message-input");
+      const statusEl = document.getElementById("guestbook-message");
+
+      const name = (nameEl.value || "").trim() || "Anonymous";
+      const city = (cityEl.value || "").trim();
+      const message = (msgEl.value || "").trim();
+
+      if (!message) {
+        statusEl.textContent = "Please write a message first.";
+        return;
+      }
+
+      statusEl.textContent = "Sending...";
+      try {
+        await fetch(GUESTBOOK_API_URL, {
+          method: "POST",
+          body: JSON.stringify({ name, city, message })
+        });
+        statusEl.textContent = "Thank you, your message has been added.";
+        msgEl.value = "";
+        fetchGuestbook();
+      } catch (err) {
+        console.error("Guestbook submit error", err);
+        statusEl.textContent = "Could not send that right now.";
+      }
+    }
+
+    // Init
+    document.addEventListener("DOMContentLoaded", () => {
+      // Logo / profile
+      const logoEl = document.getElementById("site-logo");
+      if (logoEl) logoEl.src = LOGO_IMG_URL;
+      const profileEl = document.getElementById("profile-pic");
+      if (profileEl) profileEl.src = PROFILE_IMG_URL;
+
+      setStatus();
+      setInterval(setStatus, 12000);
+      setRandomGif();
+      updateMetrics();
+      setInterval(updateMetrics, 3000);
+      initVisitCounter();
+      initTrackingDots();
+
+      initQRCode();
+      loadHoliday();
+      loadPotterFact();
       loadGeoInfo();
+
+      initRougvieMap();
+      fetchRougvies();
+      const rougvieBtn = document.getElementById("im-rougvie-btn");
+      if (rougvieBtn) rougvieBtn.addEventListener("click", handleRougvieClick);
+
+      fetchGuestbook();
+      const guestForm = document.getElementById("guestbook-form");
+      if (guestForm) guestForm.addEventListener("submit", submitGuestbook);
 
       document.getElementById("year").textContent = new Date().getFullYear();
     });
