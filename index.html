@@ -5,17 +5,13 @@
   <title>Rougvie.com | Retro Hub</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <!-- Leaflet for the Rougvies map -->
+  <!-- Leaflet for the Rougvies map (no integrity/crossorigin to avoid SRI issues on GH Pages) -->
   <link
     rel="stylesheet"
     href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-    integrity="sha512-sA+e2atf6E1zFe2aTZWwqY0MyoVo9zc3rroWAtxEvsC0BpFkEuk+qS0bkkCm1cW0XkyKADVY6vwxY9G1l6Liw=="
-    crossorigin=""
   />
   <script
     src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-    integrity="sha512-QV9NQZbyrC6Q4qzM0qzNPX9ekJy5o+1OtSWT8gJtIhXCTITVEWilQoNqT9bkOuM54q9WlH0hZlIsA2xzd7fQmA=="
-    crossorigin=""
     defer
   ></script>
 
@@ -37,9 +33,10 @@
       overflow-x: hidden;
     }
 
-    /* Sword cursor everywhere, with fallback */
+    /* Sword cursor everywhere, with fallback
+       Note: for this to show, cursor-sword.png should be reasonably small (e.g. 32x32 or 48x48). */
     html, body {
-      cursor: url("images/cursor-sword.png") 0 0, auto;
+      cursor: url("images/cursor-sword.png") 16 16, auto;
     }
 
     a {
@@ -59,10 +56,10 @@
       background: rgba(10, 10, 40, 0.96);
       box-shadow: 0 0 25px rgba(0, 0, 0, 0.9);
       position: relative;
-      overflow: visible; /* allow Charles/d20s to move outside the frame */
+      overflow: visible; /* allow Charles/d20s to wander wider */
     }
 
-    /* Charles drifting behind content, inside wrapper but not clipped */
+    /* Charles drifting behind content, can move wider */
     .background-charles {
       position: absolute;
       top: 40%;
@@ -80,35 +77,16 @@
       100% { transform: translate(60vw, -25vh); }
     }
 
-    /* Floating d20s: smaller, on top, more visible */
+    /* Floating d20s: controlled by JS, fixed to viewport, above most content */
     .d20-floater {
-      position: absolute;
+      position: fixed;
+      top: 0;
+      left: 0;
       width: 90px;
       opacity: 0.7;
       pointer-events: none;
       z-index: 5;
-    }
-
-    .d20-1 { animation: d20float1 38s linear infinite; }
-    .d20-2 { animation: d20float2 44s linear infinite; }
-    .d20-3 { animation: d20float3 52s linear infinite; }
-
-    @keyframes d20float1 {
-      0%   { transform: translate(-15vw, -10vh); }
-      50%  { transform: translate(20vw, 20vh); }
-      100% { transform: translate(60vw, -5vh); }
-    }
-
-    @keyframes d20float2 {
-      0%   { transform: translate(80vw, 50vh); }
-      50%  { transform: translate(30vw, 10vh); }
-      100% { transform: translate(-10vw, 40vh); }
-    }
-
-    @keyframes d20float3 {
-      0%   { transform: translate(10vw, 80vh); }
-      50%  { transform: translate(70vw, 30vh); }
-      100% { transform: translate(20vw, -10vh); }
+      transform: translate(0, 0) rotate(0deg);
     }
 
     .sticker {
@@ -138,7 +116,7 @@
       text-shadow: 2px 2px 0 #000;
       position: relative;
       z-index: 2;
-      overflow: hidden; /* keep Pokémon inside banner */
+      overflow: hidden; /* keeps Pokémon inside banner */
     }
 
     .header-top {
@@ -277,14 +255,14 @@
       border-bottom: 1px solid rgba(255, 255, 255, 0.3);
     }
 
-    /* Profile frame so background image is visible behind pic */
+    /* Profile frame with background, image on top */
     .profile-pic {
       width: 100%;
       aspect-ratio: 4 / 5;
       border: 3px double #ffcc00;
       margin-bottom: 6px;
       background-color: #000;
-      background-image: url("images/captain-planet.png"); /* set this to your GIF if needed */
+      background-image: url("images/captain-planet.gif");
       background-size: cover;
       background-position: center;
       background-repeat: no-repeat;
@@ -459,13 +437,6 @@
       margin: 0;
       border: none;
       background: transparent;
-    }
-
-    .gif-caption {
-      font-size: 0.8rem;
-      text-align: center;
-      opacity: 0.8;
-      margin-top: 2px;
     }
 
     .shop-grid {
@@ -670,22 +641,20 @@
     <!-- drifting Charles behind content -->
     <img src="images/charles.png" alt="Background Charles" class="background-charles">
 
-    <!-- three floating d20s -->
+    <!-- three floating d20s (positions controlled in JS) -->
     <img src="images/d20-1.png" alt="d20" class="d20-floater d20-1">
     <img src="images/d20-2.png" alt="d20" class="d20-floater d20-2">
     <img src="images/d20-3.png" alt="d20" class="d20-floater d20-3">
 
     <!-- floating stickers -->
-    <img class="sticker star1" src="images/glitter-star-1.gif" alt="sparkle">
-    <img class="sticker star2" src="images/glitter-star-2.gif" alt="sparkle">
-    <img class="sticker star3" src="images/glitter-star-3.gif" alt="sparkle">
+    <img class="sticker star1" src="images/glitter-star.gif" alt="sparkle">
+    <img class="sticker star2" src="images/glitter-star.gif" alt="sparkle">
+    <img class="sticker star3" src="images/glitter-star.gif" alt="sparkle">
 
     <header>
       <div class="header-top">
         <div class="logo-wrap">
           <div class="site-logo-circle">
-            <!-- optional logo image -->
-            <!-- <img src="images/BoldRabble.png" alt="logo"> -->
             <span>Site<br>logo</span>
           </div>
           <div>
@@ -1292,15 +1261,16 @@ local.time: <span id="localtime-value">00:00:00</span>
           img.src = sprite;
           img.style.display = "block";
         } else {
-          console.warn("No sprite, using fallback");
-          img.src = "images/test-pokemon.png";
+          console.warn("No sprite, using fallback (charles.png)");
+          img.src = "images/charles.png";
           img.style.display = "block";
         }
       } catch (err) {
         console.error("Pokemon error:", err);
         const img = document.getElementById("pokemon-runner");
         if (img) {
-          img.src = "images/test-pokemon.png";
+          // Local fallback that definitely exists
+          img.src = "images/charles.png";
           img.style.display = "block";
         }
       }
@@ -1315,13 +1285,11 @@ local.time: <span id="localtime-value">00:00:00</span>
       const header = document.querySelector("header");
       if (!img || !header) return;
 
-      // Start roughly in the middle of the banner
       let x = 40;
       let y = 10;
-      let vx = 3.5;   // horizontal speed
-      let vy = 2.8;   // vertical speed
+      let vx = 3.5;
+      let vy = 2.8;
 
-      // Track mouse position relative to header
       let cursorX = 0;
       let cursorY = 0;
       let cursorInside = false;
@@ -1346,7 +1314,6 @@ local.time: <span id="localtime-value">00:00:00</span>
         x += vx;
         y += vy;
 
-        // Bounce off left/right edges
         if (x <= 0) {
           x = 0;
           vx *= -1;
@@ -1355,7 +1322,6 @@ local.time: <span id="localtime-value">00:00:00</span>
           vx *= -1;
         }
 
-        // Bounce off top/bottom edges
         if (y <= 0) {
           y = 0;
           vy *= -1;
@@ -1364,14 +1330,13 @@ local.time: <span id="localtime-value">00:00:00</span>
           vy *= -1;
         }
 
-        // Bounce off cursor if we are close enough
         if (cursorInside) {
           const centerX = x + spriteWidth / 2;
           const centerY = y + spriteHeight / 2;
           const dx = centerX - cursorX;
           const dy = centerY - cursorY;
           const dist = Math.hypot(dx, dy);
-          const minDist = 50; // distance at which it "hits" the cursor
+          const minDist = 50;
 
           if (dist < minDist && dist > 0) {
             const signX = centerX < cursorX ? -1 : 1;
@@ -1392,13 +1357,105 @@ local.time: <span id="localtime-value">00:00:00</span>
       requestAnimationFrame(tick);
     }
 
+    // ---- D20 FLOATERS (FASTER, SPIN, AVOID CURSOR) ------------------------
+
+    function initD20Floaters() {
+      const nodes = Array.from(document.querySelectorAll(".d20-floater"));
+      if (!nodes.length) return;
+
+      const floaters = nodes.map(el => {
+        return {
+          el,
+          x: Math.random() * window.innerWidth,
+          y: Math.random() * window.innerHeight,
+          vx: (Math.random() * 2 + 1) * (Math.random() < 0.5 ? -1 : 1),
+          vy: (Math.random() * 2 + 1) * (Math.random() < 0.5 ? -1 : 1),
+          angle: Math.random() * 360,
+          spin: (Math.random() * 2 + 1) * (Math.random() < 0.5 ? -1 : 1)
+        };
+      });
+
+      let cursorX = window.innerWidth / 2;
+      let cursorY = window.innerHeight / 2;
+
+      document.addEventListener("mousemove", (e) => {
+        cursorX = e.clientX;
+        cursorY = e.clientY;
+      });
+
+      function tick() {
+        const w = window.innerWidth;
+        const h = window.innerHeight;
+
+        for (const f of floaters) {
+          const fw = f.el.offsetWidth || 80;
+          const fh = f.el.offsetHeight || 80;
+
+          f.x += f.vx;
+          f.y += f.vy;
+
+          if (f.x <= 0) {
+            f.x = 0;
+            f.vx = Math.abs(f.vx);
+          } else if (f.x + fw >= w) {
+            f.x = w - fw;
+            f.vx = -Math.abs(f.vx);
+          }
+
+          if (f.y <= 0) {
+            f.y = 0;
+            f.vy = Math.abs(f.vy);
+          } else if (f.y + fh >= h) {
+            f.y = h - fh;
+            f.vy = -Math.abs(f.vy);
+          }
+
+          const centerX = f.x + fw / 2;
+          const centerY = f.y + fh / 2;
+          const dx = centerX - cursorX;
+          const dy = centerY - cursorY;
+          const dist = Math.hypot(dx, dy);
+
+          const avoidRadius = 120;
+          if (dist > 0 && dist < avoidRadius) {
+            const factor = 0.4;
+            f.vx += (dx / dist) * factor;
+            f.vy += (dy / dist) * factor;
+          }
+
+          const maxSpeed = 6;
+          const speed = Math.hypot(f.vx, f.vy);
+          if (speed > maxSpeed) {
+            const scale = maxSpeed / speed;
+            f.vx *= scale;
+            f.vy *= scale;
+          }
+
+          f.angle += f.spin;
+
+          f.el.style.transform =
+            `translate(${f.x}px, ${f.y}px) rotate(${f.angle}deg)`;
+        }
+
+        requestAnimationFrame(tick);
+      }
+
+      requestAnimationFrame(tick);
+    }
+
     // ---- ROUVGIES MAP ----------------------------------------------------
 
     let rougvieMap = null;
 
     function initRougviesMap() {
       const mapDiv = document.getElementById("rougvies-map");
-      if (!mapDiv || typeof L === "undefined") return;
+      if (!mapDiv) return;
+
+      if (typeof L === "undefined") {
+        console.error("Leaflet L is undefined. Map script may not have loaded.");
+        mapDiv.innerHTML = "<p style='font-size:0.85rem;'>Map could not load. If this keeps happening, check Leaflet CDN access.</p>";
+        return;
+      }
 
       rougvieMap = L.map("rougvies-map").setView([20, 0], 2);
 
@@ -1570,12 +1627,13 @@ local.time: <span id="localtime-value">00:00:00</span>
       });
     })();
 
-    // ---- INITIALISE MAP, GUESTBOOK, POKÉMON AFTER LOAD -------------------
+    // ---- INITIALISE MAP, GUESTBOOK, POKÉMON, D20s AFTER LOAD --------------
 
     window.addEventListener("load", () => {
       initRougviesMap();
       loadGuestbook();
       initPokemonRunner();
+      initD20Floaters();
     });
   </script>
 </body>
