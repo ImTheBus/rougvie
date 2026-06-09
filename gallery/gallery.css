@@ -1,0 +1,147 @@
+/* =========================================================
+   rougvie.com — photo gallery, EDGELANDS skin
+   Inherits the landing palette/atmosphere from ../styles.css.
+   This file holds only the gallery-specific layout: quiet
+   theme sections + a restrained survey-plate masonry grid,
+   plus an optional vanilla lightbox.
+   ========================================================= */
+
+/* ---------- gallery header ---------- */
+.g-header {
+  padding-block: clamp(3.5rem, 10vh, 6rem) clamp(2rem, 5vh, 3rem);
+}
+.g-back {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.16em;
+  text-transform: uppercase; color: var(--mute);
+  margin-bottom: 2rem;
+  transition: color 0.4s var(--ease), gap 0.4s var(--ease);
+}
+.g-back:hover { color: var(--rust); gap: 0.85rem; }
+
+.g-title {
+  font-size: clamp(2rem, 5.5vw, 3.4rem); line-height: 1.04;
+  letter-spacing: -0.015em; color: var(--ink); margin-bottom: 1rem;
+  text-wrap: balance;
+}
+.g-title em { font-style: italic; }
+.g-handle {
+  font-family: var(--mono); font-size: 0.8rem; letter-spacing: 0.12em;
+  color: var(--rust); margin-bottom: 1.4rem; display: inline-block;
+}
+.g-bio {
+  font-style: italic; font-size: clamp(1.02rem, 1.05rem + 0.3vw, 1.22rem);
+  line-height: 1.7; max-width: 58ch; color: var(--ink-soft);
+  margin-bottom: 1.6rem;
+}
+.g-extlink {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  font-family: var(--mono); font-size: 0.78rem; letter-spacing: 0.1em;
+  color: var(--rust); border-bottom: 1px solid var(--rust);
+  padding-bottom: 0.2rem;
+  transition: gap 0.4s var(--ease), color 0.4s var(--ease);
+}
+.g-extlink:hover { gap: 0.85rem; color: var(--rust-deep); }
+
+/* ---------- theme section ---------- */
+.g-theme { padding-block: clamp(2.2rem, 6vh, 4rem); border-top: 1px solid var(--line); }
+.g-theme-head {
+  display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.6rem 1.2rem;
+  margin-bottom: clamp(1.4rem, 3.5vh, 2.2rem);
+}
+.g-theme-head h2 {
+  font-size: clamp(1.5rem, 3.4vw, 2.3rem); line-height: 1.05;
+  color: var(--ink); letter-spacing: -0.01em;
+}
+.g-theme-head h2 em { font-style: italic; }
+.g-theme-count {
+  font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.2em;
+  text-transform: uppercase; color: var(--rust);
+  border-bottom: 1px solid var(--line-strong); padding-bottom: 0.2rem;
+}
+
+/* ---------- restrained masonry (CSS columns) ---------- */
+.g-grid {
+  column-count: 3;
+  column-gap: clamp(0.7rem, 1.8vw, 1.3rem);
+}
+@media (max-width: 860px) { .g-grid { column-count: 2; } }
+@media (max-width: 520px) { .g-grid { column-count: 1; } }
+
+.g-plate {
+  break-inside: avoid;
+  margin: 0 0 clamp(0.7rem, 1.8vw, 1.3rem);
+  position: relative;
+}
+.g-plate-wrap {
+  position: relative; overflow: hidden;
+  border: 1px solid var(--line-strong);
+  background: linear-gradient(160deg, var(--paper), var(--concrete-deep));
+  box-shadow: inset 0 0 40px rgba(43,41,38,0.12);
+}
+/* survey-plate corner ticks */
+.g-plate-wrap::before, .g-plate-wrap::after {
+  content: ""; position: absolute; width: 13px; height: 13px; z-index: 3;
+  border: 1px solid rgba(215,211,201,0.6); pointer-events: none;
+}
+.g-plate-wrap::before { top: 9px; left: 9px; border-right: 0; border-bottom: 0; }
+.g-plate-wrap::after  { bottom: 9px; right: 9px; border-left: 0; border-top: 0; }
+
+.g-plate img {
+  width: 100%; height: auto; display: block;
+  filter: grayscale(0.18) contrast(1.03);
+  transition: filter 0.7s var(--ease), transform 0.9s var(--ease);
+  cursor: zoom-in;
+}
+.g-plate:hover img { filter: grayscale(0) contrast(1.05); transform: scale(1.015); }
+.g-plate .g-id {
+  position: absolute; top: 9px; right: 12px; z-index: 4;
+  font-family: var(--mono); font-size: 0.56rem; letter-spacing: 0.18em;
+  color: var(--fog); mix-blend-mode: difference; opacity: 0.8;
+  pointer-events: none;
+}
+
+/* ---------- footer ---------- */
+.g-foot {
+  border-top: 1px solid var(--line);
+  padding-block: clamp(2.5rem, 7vh, 4rem) 2.5rem;
+  margin-top: clamp(2rem, 6vh, 4rem);
+}
+.g-foot-bar {
+  display: flex; justify-content: space-between; align-items: center;
+  flex-wrap: wrap; gap: 1rem;
+  font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.14em;
+  text-transform: uppercase; color: var(--mute);
+}
+
+/* ---------- lightbox (vanilla, optional enlarge) ---------- */
+.lb {
+  position: fixed; inset: 0; z-index: 9500;
+  display: none; align-items: center; justify-content: center;
+  padding: clamp(1rem, 4vw, 3rem);
+  background: rgba(20,19,17,0.92);
+  backdrop-filter: blur(3px);
+  cursor: zoom-out;
+}
+.lb.open { display: flex; }
+.lb img {
+  max-width: 100%; max-height: 100%;
+  width: auto; height: auto;
+  border: 1px solid rgba(215,211,201,0.25);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  filter: grayscale(0.06) contrast(1.03);
+}
+.lb-close {
+  position: absolute; top: clamp(0.8rem, 3vw, 1.6rem); right: clamp(0.8rem, 3vw, 1.6rem);
+  font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.16em;
+  text-transform: uppercase; color: var(--fog);
+  border: 1px solid rgba(215,211,201,0.4);
+  padding: 0.5rem 0.9rem; background: transparent; cursor: pointer;
+  transition: border-color 0.3s var(--ease), color 0.3s var(--ease);
+}
+.lb-close:hover { border-color: var(--rust); color: var(--rust); }
+
+@media (prefers-reduced-motion: reduce) {
+  .g-plate:hover img { transform: none; }
+  .lb { backdrop-filter: none; }
+}

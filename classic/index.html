@@ -1,0 +1,1654 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Rougvie.com | Retro Hub</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Leaflet for the Rougvies map (no integrity/crossorigin to avoid SRI issues on GH Pages) -->
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+  />
+  <script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    defer
+  ></script>
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: "Trebuchet MS", Verdana, Arial, sans-serif;
+      background:
+        radial-gradient(circle at top left, #ff7ac4 0, transparent 50%),
+        radial-gradient(circle at bottom right, #5cf2ff 0, transparent 55%),
+        #000020;
+      color: #e6f4ff;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* Sword cursor everywhere, with fallback
+       Note: for this to show, cursor-sword.png should be reasonably small (e.g. 32x32 or 48x48). */
+    html, body {
+      cursor: url("../images/cursor-sword.png") 16 16, auto;
+    }
+
+    a {
+      color: #90ff7a;
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+      color: #fffacd;
+    }
+
+    .page-wrapper {
+      max-width: 1100px;
+      margin: 20px auto 40px;
+      border: 3px solid #ffcc00;
+      background: rgba(10, 10, 40, 0.96);
+      box-shadow: 0 0 25px rgba(0, 0, 0, 0.9);
+      position: relative;
+      overflow: visible; /* allow Charles/d20s to wander wider */
+    }
+
+    /* Charles drifting behind content, can move wider */
+    .background-charles {
+      position: absolute;
+      top: 40%;
+      left: 10%;
+      width: 420px;
+      opacity: 0.18;
+      pointer-events: none;
+      z-index: 0;
+      animation: charles-drift 40s ease-in-out infinite alternate;
+    }
+
+    @keyframes charles-drift {
+      0%   { transform: translate(-25vw, -30vh); }
+      50%  { transform: translate(20vw, -5vh); }
+      100% { transform: translate(60vw, -25vh); }
+    }
+
+    /* Floating d20s: controlled by JS, fixed to viewport, above most content */
+    .d20-floater {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 90px;
+      opacity: 0.7;
+      pointer-events: none;
+      z-index: 5;
+      transform: translate(0, 0) rotate(0deg);
+    }
+
+    .sticker {
+      position: absolute;
+      opacity: 0.35;
+      pointer-events: none;
+      filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.6));
+      animation: float 18s linear infinite;
+      z-index: 1;
+    }
+
+    .sticker.star1 { top: 60%; left: -80px; animation-delay: 0s; }
+    .sticker.star2 { top: 10%; right: -90px; animation-delay: 4s; }
+    .sticker.star3 { top: 80%; right: -70px; animation-delay: 8s; }
+
+    @keyframes float {
+      0%   { transform: translateX(0) translateY(0) rotate(0deg); }
+      50%  { transform: translateX(-40px) translateY(-30px) rotate(10deg); }
+      100% { transform: translateX(-260px) translateY(-60px) rotate(-15deg); }
+    }
+
+    header {
+      border-bottom: 2px solid #ffcc00;
+      padding: 10px 15px 0;
+      background: linear-gradient(90deg, #ff0084, #3300ff);
+      color: #fff;
+      text-shadow: 2px 2px 0 #000;
+      position: relative;
+      z-index: 2;
+      overflow: hidden; /* keeps Pokémon inside banner */
+    }
+
+    .header-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .logo-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .site-logo-circle {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: 2px solid #ffcc00;
+      background: #000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+    }
+
+    .site-logo-circle img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 50%;
+    }
+
+    .site-title {
+      font-size: 2.3rem;
+      letter-spacing: 1px;
+    }
+
+    .site-tagline {
+      font-size: 0.9rem;
+    }
+
+    .online-status {
+      font-size: 0.9rem;
+      background: #00cc4b;
+      color: #021b06;
+      padding: 3px 8px;
+      border-radius: 999px;
+      border: 2px solid #e6ffe6;
+      box-shadow: 0 0 6px rgba(0, 0, 0, 0.7);
+      animation: pulse 1.6s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); box-shadow: 0 0 4px #e6ffe6; }
+      50%      { transform: scale(1.08); box-shadow: 0 0 10px #e6ffe6; }
+    }
+
+    nav {
+      margin-top: 10px;
+      padding-bottom: 6px;
+      border-top: 2px solid rgba(255, 255, 255, 0.4);
+      border-bottom: 2px solid rgba(255, 255, 255, 0.4);
+      text-align: center;
+      font-size: 0.95rem;
+      position: relative;
+      z-index: 2;
+    }
+
+    nav a {
+      display: inline-block;
+      margin: 4px 12px;
+      padding: 4px 8px;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 4px;
+      border: 1px solid rgba(255, 255, 255, 0.4);
+    }
+
+    nav a:hover {
+      background: rgba(0, 0, 0, 0.65);
+    }
+
+    /* Pokémon bouncing inside top banner */
+    .pokemon-runner {
+      position: absolute;
+      width: 64px;
+      height: 64px;
+      pointer-events: none;
+      image-rendering: pixelated;
+      z-index: 3;
+      transform: translate(0, 0);
+    }
+
+    .marquee-wrapper {
+      background: #000010;
+      border-top: 2px dashed #ffcc00;
+      border-bottom: 2px dashed #ffcc00;
+      padding: 4px 0;
+      font-size: 0.9rem;
+      color: #fffdc2;
+      position: relative;
+      z-index: 2;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      gap: 10px;
+      padding: 15px;
+      position: relative;
+      z-index: 2;
+    }
+
+    @media (max-width: 800px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .panel {
+      background: rgba(16, 16, 52, 0.68);
+      border: 2px solid #ffcc00;
+      margin-bottom: 12px;
+      padding: 10px;
+      box-shadow: 2px 2px 0 #000;
+    }
+
+    .panel h2 {
+      font-size: 1.1rem;
+      margin-bottom: 6px;
+      color: #fffdc2;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+    }
+
+    /* Profile frame with background, image on top */
+    .profile-pic {
+      width: 100%;
+      aspect-ratio: 4 / 5;
+      border: 3px double #ffcc00;
+      margin-bottom: 6px;
+      background-color: #000;
+      background-image: url("../images/captain-planet.gif");
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .profile-pic img {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transform: scaleX(-1);
+      z-index: 1;
+    }
+
+    .profile-name {
+      font-weight: bold;
+      font-size: 1.05rem;
+      margin-bottom: 4px;
+    }
+
+    .profile-meta {
+      font-size: 0.85rem;
+      line-height: 1.4;
+    }
+
+    .status-box {
+      background: #000015;
+      border: 1px solid #ff88ff;
+      padding: 6px;
+      font-size: 0.85rem;
+      margin-top: 5px;
+    }
+
+    .status-label {
+      font-weight: bold;
+      color: #ff88ff;
+    }
+
+    .now-playing {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.85rem;
+      margin-top: 4px;
+    }
+
+    .equalizer {
+      display: inline-flex;
+      gap: 2px;
+      align-items: flex-end;
+      height: 12px;
+    }
+
+    .bar {
+      width: 3px;
+      background: #90ff7a;
+      animation: bounce 0.8s infinite alternate;
+    }
+
+    .bar:nth-child(2) { animation-delay: 0.2s; }
+    .bar:nth-child(3) { animation-delay: 0.4s; }
+    .bar:nth-child(4) { animation-delay: 0.6s; }
+
+    @keyframes bounce {
+      0%   { height: 3px; }
+      100% { height: 12px; }
+    }
+
+    .profile-footer-gif {
+      display: block;
+      width: 100%;
+      margin-top: 6px;
+      border: 2px solid #ff88ff;
+      background: #000;
+    }
+
+    .contact-list {
+      list-style: none;
+      font-size: 0.85rem;
+      line-height: 1.6;
+    }
+
+    .status-metrics {
+      font-size: 0.8rem;
+      margin-top: 6px;
+      background: #000015;
+      border: 1px solid #00eaff;
+      padding: 6px;
+      font-family: "Consolas", "Courier New", monospace;
+      white-space: pre-line;
+    }
+
+    .tracking-text {
+      font-size: 0.85rem;
+      line-height: 1.4;
+      margin-top: 4px;
+    }
+
+    .qr-subpanel {
+      margin-top: 8px;
+      padding-top: 6px;
+      border-top: 1px solid rgba(255,255,255,0.25);
+    }
+
+    .qr-subpanel h3 {
+      font-size: 0.95rem;
+      margin-bottom: 4px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .qr-img {
+      width: 160px;
+      height: 160px;
+      border: 3px solid #ffcc00;
+      background: #fff;
+      display: block;
+      margin-top: 4px;
+    }
+
+    .friends-text {
+      font-size: 0.85rem;
+      line-height: 1.4;
+      margin-bottom: 4px;
+    }
+
+    .content-panel {
+      background: rgba(5, 5, 24, 0.68);
+      border: 2px solid #ffcc00;
+      padding: 12px;
+      margin-bottom: 12px;
+      box-shadow: 2px 2px 0 #000;
+      position: relative;
+    }
+
+    .content-panel h2 {
+      font-size: 1.2rem;
+      margin-bottom: 8px;
+      color: #fffdc2;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.25);
+    }
+
+    .content-panel p {
+      font-size: 0.95rem;
+      line-height: 1.5;
+      margin-bottom: 8px;
+    }
+
+    /* Ensure About text is not cut off by flame gif */
+    #about {
+      padding-bottom: 60px;
+    }
+
+    /* fire gif glued to bottom border, no frame */
+    .about-gif-wrapper {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      border-top: 2px solid #ffcc00;
+    }
+
+    .about-gif {
+      display: block;
+      width: 100%;
+      height: 40px;
+      object-fit: cover;
+      margin: 0;
+      border: none;
+      background: transparent;
+    }
+
+    .shop-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+      gap: 10px;
+      margin-top: 6px;
+    }
+
+    .shop-card {
+      background: linear-gradient(145deg, #1b1b3f, #00001a);
+      border: 1px solid #ff88ff;
+      padding: 8px;
+      font-size: 0.9rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .shop-card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(120deg, transparent, rgba(255, 255, 255, 0.15), transparent);
+      transform: translateX(-100%);
+      animation: sheen 4s linear infinite;
+    }
+
+    @keyframes sheen {
+      0%   { transform: translateX(-100%); }
+      60%  { transform: translateX(120%); }
+      100% { transform: translateX(120%); }
+    }
+
+    .shop-card h3 {
+      font-size: 1rem;
+      margin-bottom: 4px;
+      color: #fffdc2;
+    }
+
+    .shop-card p {
+      font-size: 0.85rem;
+      margin-bottom: 4px;
+    }
+
+    .signals-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+      gap: 8px;
+      margin-top: 6px;
+    }
+
+    .signal-card {
+      border: 1px solid #ff88ff;
+      background: #080822;
+      padding: 6px;
+      font-size: 0.9rem;
+    }
+
+    .signal-card h3 {
+      font-size: 0.95rem;
+      margin-bottom: 4px;
+      color: #fffdc2;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .wiki-donate-btn {
+      display: inline-block;
+      padding: 4px 8px;
+      border: 1px solid #ffcc00;
+      background: #103050;
+      color: #fffdc2;
+      font-size: 0.85rem;
+      text-decoration: none;
+    }
+
+    .wiki-donate-btn:hover {
+      background: #ffc800;
+      color: #000010;
+    }
+
+    .rougvies-map {
+      width: 100%;
+      height: 260px;
+      border: 1px solid #ff88ff;
+      margin-top: 6px;
+      background: #000;
+    }
+
+    .rougvie-button {
+      padding: 4px 8px;
+      border-radius: 999px;
+      border: 1px solid #ffcc00;
+      background: #101050;
+      color: #fffdc2;
+      font-size: 0.9rem;
+    }
+
+    .rougvie-button:hover {
+      background: #ffc800;
+      color: #000010;
+    }
+
+    .guestbook-form-shell {
+      border: 1px dashed #ffcc00;
+      padding: 4px;
+      margin-top: 4px;
+      max-height: 26px;
+      overflow: hidden;
+      transition: max-height 0.3s ease;
+    }
+
+    .guestbook-form-shell:hover {
+      max-height: 500px;
+    }
+
+    .guestbook-form-shell h3 {
+      margin-bottom: 4px;
+      font-size: 0.9rem;
+    }
+
+    .guestbook-form-shell input,
+    .guestbook-form-shell textarea,
+    .guestbook-form-shell button {
+      width: 100%;
+      margin-bottom: 4px;
+      padding: 4px;
+      font-family: inherit;
+      font-size: 0.9rem;
+      background: #000020;
+      border: 1px solid #ff88ff;
+      color: #e6f4ff;
+    }
+
+    .guestbook-form-shell button {
+      cursor: pointer;
+      background: #101050;
+    }
+
+    .guestbook-entries {
+      font-size: 0.9rem;
+      margin-top: 8px;
+      max-height: 260px;
+      overflow-y: auto;
+      border-top: 1px solid rgba(255,255,255,0.25);
+      padding-top: 4px;
+    }
+
+    .guestbook-entry {
+      margin-bottom: 6px;
+      padding-bottom: 4px;
+      border-bottom: 1px dotted rgba(255,255,255,0.2);
+    }
+
+    footer {
+      text-align: center;
+      padding: 8px;
+      font-size: 0.8rem;
+      color: #d4e6ff;
+      background: #000010;
+      border-top: 2px solid #ffcc00;
+      position: relative;
+      z-index: 2;
+    }
+
+    footer a {
+      color: #ff88ff;
+    }
+
+    /* Cursor trail dots */
+    .cursor-trail-dot {
+      position: fixed;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.75);
+      pointer-events: none;
+      transform: translate(-50%, -50%);
+      animation: trailFade 0.5s ease-out forwards;
+      z-index: 9999;
+    }
+
+    .cursor-trail-dot.link {
+      background: rgba(255, 0, 0, 0.85);
+    }
+
+    @keyframes trailFade {
+      0% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+      }
+      100% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.4);
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="page-wrapper">
+    <!-- drifting Charles behind content -->
+    <img src="../images/charles.png" alt="Background Charles" class="background-charles">
+
+    <!-- three floating d20s (positions controlled in JS) -->
+    <img src="../images/d20-1.png" alt="d20" class="d20-floater d20-1">
+    <img src="../images/d20-2.png" alt="d20" class="d20-floater d20-2">
+    <img src="../images/d20-3.png" alt="d20" class="d20-floater d20-3">
+
+    <!-- floating stickers -->
+    <img class="sticker star1" src="../images/glitter-star.gif" alt="sparkle">
+    <img class="sticker star2" src="../images/glitter-star.gif" alt="sparkle">
+    <img class="sticker star3" src="../images/glitter-star.gif" alt="sparkle">
+
+    <header>
+      <div class="header-top">
+        <div class="logo-wrap">
+          <div class="site-logo-circle">
+            <span>Site<br>logo</span>
+          </div>
+          <div>
+            <div class="site-title">Rougvie.com</div>
+            <div class="site-tagline">
+              Books, games, dioramas, spreadsheets, Red-Life Adventures and other Rougvie side projects.
+            </div>
+          </div>
+        </div>
+        <div class="online-status">Dean is online</div>
+      </div>
+
+      <nav>
+        <a href="#about">About</a>
+        <a href="#shops">Spaces &amp; shops</a>
+        <a href="#signals">Signals</a>
+        <a href="#rougvies">Rougvies map</a>
+        <a href="#guestbook">Guestbook</a>
+      </nav>
+      <img id="pokemon-runner" class="pokemon-runner" src="" alt="">
+    </header>
+
+    <div class="marquee-wrapper">
+      <marquee behavior="scroll" direction="left" scrollamount="4">
+        Welcome to the Rougvie.com hub. Featuring D&amp;D nonsense, crunchy spreadsheets, terrain builds, management tools and the occasional half-finished experiment.
+      </marquee>
+    </div>
+
+    <main class="layout">
+      <!-- Left column -->
+      <section>
+        <div class="panel">
+          <h2>Profile</h2>
+
+          <div class="profile-pic">
+            <img id="profile-pic" src="../images/DR.png" alt="Dean profile picture">
+          </div>
+
+          <div class="profile-name">Dean Rougvie</div>
+          <div class="profile-meta">
+            Location: Edinburgh, Scotland<br>
+            Day job: Steering books and warehouses.<br>
+            Night job: Red-Life Adventures, BoldRabble and ImTheBus experiments.
+          </div>
+
+          <div class="status-box">
+            <div class="status-label">Current status:</div>
+            <div id="status-text">Loading creative chaos...</div>
+          </div>
+
+          <div class="now-playing">
+            <div class="equalizer" aria-hidden="true">
+              <div class="bar"></div>
+              <div class="bar"></div>
+              <div class="bar"></div>
+              <div class="bar"></div>
+            </div>
+            <span>Now playing: background podcast about dice probabilities.</span>
+          </div>
+
+          <img src="../images/gif-retro-1.gif" alt="Profile footer gif" class="profile-footer-gif">
+        </div>
+
+        <div class="panel">
+          <h2>Contact &amp; metrics</h2>
+          <ul class="contact-list">
+            <li><strong>Email:</strong> <a href="mailto:you@rougvie.com">you@rougvie.com</a></li>
+            <li><strong>Instagram:</strong> <a href="https://www.instagram.com/boldrabble/" target="_blank" rel="noopener">BoldRabble</a></li>
+            <li><strong>Topics:</strong> D&amp;D, terrain, spreadsheets, weird ideas, warehouses.</li>
+          </ul>
+
+          <div class="status-metrics">
+sys.uptime: <span id="uptime-value">0000s</span>
+net.ping: <span id="ping-value">42</span> ms
+cache.mood: <span id="mood-value">OK</span>
+visits.hits: <span id="visits-value">offline</span>
+local.time: <span id="localtime-value">00:00:00</span>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h2 id="tracking-heading">Tracking user.</h2>
+          <div class="tracking-text">
+            &rsaquo; Approx location: <span id="approx-location">Resolving via IP magic...</span><br>
+            &rsaquo; IP fingerprint: <span id="ip-fingerprint">...</span>
+          </div>
+          <p class="tracking-text">
+            This is all guessed from your IP address. If you are on a VPN, shared Wi-Fi, company network or hacking the Gibson like 90s-era Jonny Lee Miller, the details will be wildly wrong.
+          </p>
+
+          <div class="qr-subpanel">
+            <h3>Scan to visit later</h3>
+            <p style="font-size:0.85rem;">
+              Point a camera at this to bookmark the hub.
+            </p>
+            <img id="qr-code" class="qr-img" src="" alt="QR code for this site">
+          </div>
+        </div>
+
+        <div class="panel">
+          <h2>Friends &amp; links</h2>
+          <p class="friends-text">
+            Coming soon: collaborators and other people who put up with my projects.
+          </p>
+          <p class="friends-text" style="opacity:0.8;">
+            If we have worked together and you want a link here, give me a nudge.
+          </p>
+        </div>
+      </section>
+
+      <!-- Right column -->
+      <section>
+        <div class="content-panel" id="about">
+          <h2>About this hub</h2>
+          <p>
+            This is a simple retro hub for the Rougvie multiverse: Red-Life Adventures (RPG stuff), BoldRabble (terrain and resin), ImTheBus (management tools) and whatever else is in progress.
+          </p>
+          <p>
+            Most of what shows up here started as an experiment. Some of it became products, some of it is just here because it amused me. Expect useful tools, odd builds and the occasional glitch.
+          </p>
+
+          <div class="about-gif-wrapper">
+            <img id="about-gif" class="about-gif" src="../images/gif-retro-2.gif" alt="Retro gif">
+          </div>
+        </div>
+
+        <div class="content-panel" id="shops">
+          <h2>Spaces &amp; shops</h2>
+          <p>Where the different Rougvie projects live on the wider internet.</p>
+
+          <article class="shop-card">
+          <h3>Flag Game</h3>
+          <p>A chaotic little web toy that tests whether you know your flags or just like clicking fast.</p>
+          <p>
+            <a href="https://imthebus.github.io/flag-game/" target="_blank" rel="noopener">
+              Play Flag Game
+            </a>
+          </p>
+        </article>
+        
+        <article class="shop-card">
+          <h3>Insignia Generator</h3>
+          <p>A generative symbol machine that produces unpredictable chaos. Best enjoyed at unsafe speeds.</p>
+          <p>
+            <a href="https://imthebus.github.io/insig/" target="_blank" rel="noopener">
+              Open Insignia Generator
+            </a>
+          </p>
+        </article>
+        
+        <article class="shop-card">
+          <h3>Monitor View</h3>
+          <p>
+            A fake retro terminal streaming nonsense data.  
+            Works best on a large screen.  
+            No attempt will be made to make it display nicely on mobile.
+          </p>
+          <p>
+            <a href="https://imthebus.github.io/monitor/" target="_blank" rel="noopener">
+              Launch Monitor
+            </a>
+          </p>
+        </article>
+
+          <div class="shop-grid">
+            <article class="shop-card">
+              <h3>Rougvie.com</h3>
+              <p>This hub, tying together the projects and experiments in one place.</p>
+              <p><em>You are already here.</em></p>
+            </article>
+
+            <article class="shop-card">
+              <h3>Red-Life Adventures</h3>
+              <p>RPG content, tables and oddities under the Red-Life Adventures banner.</p>
+              <p>
+                <a href="https://red-life-adventures.com" target="_blank" rel="noopener">
+                  Visit red-life-adventures.com
+                </a>
+              </p>
+            </article>
+
+            <article class="shop-card">
+              <h3>DriveThruRPG titles</h3>
+              <p>Digital adventures, tables and tools released on DriveThruRPG.</p>
+              <p>
+                <a href="https://www.drivethrurpg.com" target="_blank" rel="noopener">
+                  Open titles on DriveThruRPG
+                </a>
+              </p>
+            </article>
+
+            <article class="shop-card">
+              <h3>ImTheBus tools</h3>
+              <p>Management and leadership web tools, 2x2s and experiments.</p>
+              <p><a href="https://imthebus.co.uk" target="_blank" rel="noopener">Visit imthebus.co.uk</a></p>
+            </article>
+
+            <article class="shop-card">
+              <h3>Redbubble &ndash; ImTheBus</h3>
+              <p>Spreadsheet jokes, retro pixels and nerdy designs on mugs, shirts and more.</p>
+              <p><a href="https://www.redbubble.com/people/imthebus/shop" target="_blank" rel="noopener">Visit Redbubble shop</a></p>
+            </article>
+
+            <article class="shop-card">
+              <h3>Etsy &ndash; RedLife3D</h3>
+              <p>Spell slot trackers, counters and printable tools for D&amp;D and other games.</p>
+              <p><a href="https://www.etsy.com/shop/RedLife3D" target="_blank" rel="noopener">Visit Etsy shop</a></p>
+            </article>
+
+            <article class="shop-card">
+              <h3>BoldRabble on Instagram</h3>
+              <p>Diorama builds, resin experiments and behind-the-scenes workshop chaos.</p>
+              <p><a href="https://www.instagram.com/boldrabble/" target="_blank" rel="noopener">Watch the reels</a></p>
+            </article>
+          </div>
+        </div>
+
+        <div class="content-panel" id="signals">
+          <h2>Signals from the multiverse</h2>
+
+          <div class="signals-grid">
+            <article class="signal-card" id="signal-calendar">
+              <h3>Today in the calendar</h3>
+              <p id="calendar-text">Loading next global holiday...</p>
+            </article>
+
+            <article class="signal-card" id="signal-useless">
+              <h3>Today’s useless fact</h3>
+              <p id="useless-fact">Fetching something gloriously pointless...</p>
+            </article>
+
+            <article class="signal-card" id="signal-quote">
+              <h3>Quotable quote</h3>
+              <p id="quote-text">Loading a line from someone smarter than us...</p>
+              <p id="quote-author" style="font-size:0.85rem; opacity:0.8;"></p>
+            </article>
+
+            <article class="signal-card" id="signal-quake">
+              <h3>Most recent earthquake</h3>
+              <p id="quake-text">Checking with USGS...</p>
+            </article>
+
+            <article class="signal-card" id="signal-rocket">
+              <h3>Next rocket launch</h3>
+              <p id="rocket-text">Asking RocketLaunch.Live for details...</p>
+            </article>
+
+            <article class="signal-card" id="signal-wiki">
+              <h3>Wikipedia spotlight</h3>
+              <p id="wiki-text">Finding what everyone just looked up...</p>
+              <p style="margin-top:6px;">
+                <a href="https://donate.wikimedia.org" target="_blank" rel="noopener"
+                   class="wiki-donate-btn">Support Wikipedia</a>
+              </p>
+            </article>
+          </div>
+        </div>
+
+        <div class="content-panel" id="rougvies">
+          <h2>Rougvies of the world</h2>
+          <p>
+            I am a Rougvie, but not all Rougvies. If you are a Rougvie who found this site, click the button below to check in and add yourself to the map for future Rougvies to see.
+          </p>
+          <button id="rougvie-add-btn" class="rougvie-button">I am a Rougvie &ndash; add me</button>
+          <p style="margin-top:4px; font-size:0.85rem;">
+            Currently tracking <span id="rougvie-count">0</span> Rougvie visit(s).
+          </p>
+          <div id="rougvies-map" class="rougvies-map"></div>
+        </div>
+
+        <div class="content-panel" id="guestbook">
+          <h2>Guestbook</h2>
+          <p style="font-size:0.9rem; margin-bottom:6px;">
+            Old-school guestbook. Say hi so future Dean knows who passed through.
+          </p>
+
+          <div class="guestbook-form-shell">
+            <h3>Hover to sign the guestbook</h3>
+            <input id="gb-name" type="text" placeholder="Name (optional)">
+            <input id="gb-city" type="text" placeholder="City (optional)">
+            <textarea id="gb-message" rows="3" placeholder="Message"></textarea>
+            <button id="gb-submit-btn">Sign guestbook</button>
+          </div>
+
+          <div id="guestbook-entries" class="guestbook-entries">
+            Loading previous scribbles...
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <div>Rougvie.com &copy; <span id="year"></span>. Powered by caffeine, polyhedral dice and nostalgia.</div>
+      <div>Site look intentionally retro. If something flickers, that just means it is authentic.</div>
+    </footer>
+  </div>
+
+  <script>
+    // ---- CONSTANTS --------------------------------------------------------
+
+    const SITE_URL_FOR_QR = "https://rougvie.com";
+
+    const COUNTAPI_URL =
+      "https://api.countapi.xyz/hit/imthebus-rougvie/hub";
+
+    const ROUVIES_ENDPOINT =
+      "https://script.google.com/macros/s/AKfycbzhSzjmmpyZyklEKFDbebcnHAOMI73QdDy7rgWxit4XvCc_BPDcAxhCHen24QZr2SXZ/exec";
+    const GUESTBOOK_ENDPOINT =
+      "https://script.google.com/macros/s/AKfycbzmAAURMWxt9OfZP4C5aJrFLF0WWRhE7yibp01-E_5wDDTIkjwsePJCy87LomCF-Iw/exec";
+
+    // ---- STATUS TEXT ------------------------------------------------------
+
+    const statuses = [
+      "Painting tiny rocks and pretending it is productive.",
+      "Writing encounter tables instead of finishing campaigns.",
+      "Balancing D20s, budgets and brush strokes.",
+      "Probably thinking about how to make this terrain modular.",
+      "Trying to convince myself I do not need another 3D printer."
+    ];
+
+    function setStatus() {
+      const el = document.getElementById("status-text");
+      const pick = statuses[Math.floor(Math.random() * statuses.length)];
+      el.textContent = pick;
+    }
+
+    setStatus();
+    setInterval(setStatus, 12000);
+
+    // ---- METRICS & VISITS -------------------------------------------------
+
+    const pingEl = document.getElementById("ping-value");
+    const uptimeEl = document.getElementById("uptime-value");
+    const moodEl = document.getElementById("mood-value");
+    const visitsEl = document.getElementById("visits-value");
+    const localTimeEl = document.getElementById("localtime-value");
+
+    let uptime = 0;
+    const moods = ["OK", "OK", "OK", "IDLE", "BUILDING", "LOADING"];
+
+    function updateMetrics() {
+      uptime += Math.floor(Math.random() * 4) + 1;
+      uptimeEl.textContent = String(uptime).padStart(4, "0") + "s";
+
+      const ping = 15 + Math.floor(Math.random() * 80);
+      pingEl.textContent = ping;
+
+      const moodPick = moods[Math.floor(Math.random() * moods.length)];
+      moodEl.textContent = moodPick;
+
+      const now = new Date();
+      localTimeEl.textContent = now.toLocaleTimeString();
+    }
+
+    updateMetrics();
+    setInterval(updateMetrics, 3000);
+
+    async function loadVisitorCount() {
+      if (!visitsEl) return;
+      try {
+        const resp = await fetch(COUNTAPI_URL);
+        const data = await resp.json();
+        visitsEl.textContent = data.value ?? "online";
+      } catch (err) {
+        console.error("CountAPI error", err);
+        visitsEl.textContent = "offline";
+      }
+    }
+
+    loadVisitorCount();
+
+    // ---- TRACKING USER HEADING DOTS --------------------------------------
+
+    const trackingHeading = document.getElementById("tracking-heading");
+    let trackingDotCount = 1;
+
+    setInterval(() => {
+      if (!trackingHeading) return;
+      trackingDotCount = (trackingDotCount % 3) + 1;
+      const dots = ".".repeat(trackingDotCount);
+      trackingHeading.textContent = "Tracking user" + dots;
+    }, 1200);
+
+    // ---- "TRACKING" PANEL (purely cosmetic retro joke) --------------------
+    // No external calls, no IP lookup, no data collection. The panel is a
+    // tongue-in-cheek 90s-hacker gag with a deliberately fake static readout.
+
+    let lastLat = null;
+    let lastLon = null;
+
+    function loadIpInfo() {
+      const locEl = document.getElementById("approx-location");
+      const ipEl = document.getElementById("ip-fingerprint");
+      if (!locEl || !ipEl) return;
+
+      locEl.textContent = "somewhere with a kettle and questionable Wi-Fi";
+      ipEl.textContent = "[REDACTED FOR YOUR PROTECTION]";
+    }
+
+    loadIpInfo();
+
+    // ---- QR CODE ----------------------------------------------------------
+
+    function buildQrUrl(data) {
+      const encoded = encodeURIComponent(data);
+      return `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encoded}`;
+    }
+
+    const qrImg = document.getElementById("qr-code");
+    if (qrImg) {
+      qrImg.src = buildQrUrl(SITE_URL_FOR_QR);
+    }
+
+    // ---- NEXT HOLIDAY -----------------------------------------------------
+
+    async function loadNextHoliday() {
+      const el = document.getElementById("calendar-text");
+      if (!el) return;
+
+      try {
+        const resp = await fetch("https://date.nager.at/api/v3/NextPublicHolidaysWorldwide");
+        if (!resp.ok) throw new Error("Holiday API error");
+        const data = await resp.json();
+        if (!Array.isArray(data) || !data.length) {
+          el.textContent = "No future holidays found, which feels unlikely.";
+          return;
+        }
+
+        const next = data[0];
+        const name = next.localName || next.name;
+        const country = next.countryCode || next.country;
+        const date = next.date;
+
+        el.textContent = `Next public holiday anywhere: ${name} in ${country} on ${date}.`;
+      } catch (err) {
+        console.error(err);
+        el.textContent = "Holiday API not responding. Everyone is on a break.";
+      }
+    }
+
+    loadNextHoliday();
+
+    // ---- USELESS FACT -----------------------------------------------------
+
+    async function loadUselessFact() {
+      const el = document.getElementById("useless-fact");
+      if (!el) return;
+      try {
+        const resp = await fetch("https://uselessfacts.jsph.pl/api/v2/facts/random?language=en");
+        if (!resp.ok) throw new Error("Useless facts error");
+        const data = await resp.json();
+        el.textContent = data.text || "The fact database had nothing to say.";
+      } catch (err) {
+        console.error(err);
+        el.textContent = "Could not load a useless fact right now.";
+      }
+    }
+
+    loadUselessFact();
+
+    // ---- QUOTABLE QUOTE ---------------------------------------------------
+
+    async function loadQuote() {
+      const textEl = document.getElementById("quote-text");
+      const authEl = document.getElementById("quote-author");
+      if (!textEl) return;
+      try {
+        const resp = await fetch("https://api.quotable.io/random", {
+          headers: { "Accept": "application/json" }
+        });
+        if (!resp.ok) throw new Error("Quote error");
+        const data = await resp.json();
+        textEl.textContent = `"${data.content}"`;
+        if (authEl) authEl.textContent = "- " + data.author;
+      } catch (err) {
+        console.error(err);
+        textEl.textContent = "\"In case of API failure, invent your own wisdom.\"";
+        if (authEl) authEl.textContent = "- Some future Rougvie";
+      }
+    }
+
+    loadQuote();
+
+    // ---- LATEST EARTHQUAKE (USGS) ----------------------------------------
+
+    async function loadLatestQuake() {
+      const el = document.getElementById("quake-text");
+      if (!el) return;
+      try {
+        const resp = await fetch(
+          "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_hour.geojson"
+        );
+        if (!resp.ok) throw new Error("USGS error");
+        const data = await resp.json();
+        const features = data.features || [];
+        if (!features.length) {
+          const q = encodeURIComponent("latest earthquake USGS");
+          el.innerHTML = `No earthquakes reported in the last hour. <a href="https://duckduckgo.com/?q=${q}" target="_blank" rel="noopener">Search USGS</a>`;
+          return;
+        }
+        const quake = features[0];
+        const mag = quake.properties.mag;
+        const place = quake.properties.place;
+        const time = new Date(quake.properties.time).toLocaleTimeString();
+        const url = quake.properties.url ||
+                    `https://duckduckgo.com/?q=${encodeURIComponent("USGS earthquake " + place)}`;
+
+        el.innerHTML = `M${mag.toFixed(1)} near ${place} at ${time}. ` +
+                       `<a href="${url}" target="_blank" rel="noopener">More info</a>`;
+      } catch (err) {
+        console.error(err);
+        const q = encodeURIComponent("latest earthquake USGS");
+        el.innerHTML = `Could not fetch earthquake data. <a href="https://duckduckgo.com/?q=${q}" target="_blank" rel="noopener">Search manually</a>`;
+      }
+    }
+
+    loadLatestQuake();
+
+    // ---- NEXT ROCKET LAUNCH ----------------------------------------------
+
+    async function loadNextRocket() {
+      const el = document.getElementById("rocket-text");
+      if (!el) return;
+      try {
+        const resp = await fetch("https://fdo.rocketlaunch.live/json/launches/next/5");
+        if (!resp.ok) throw new Error("RocketLaunch error");
+        const data = await resp.json();
+        const launches = data.result || [];
+        if (!launches.length) {
+          const q = encodeURIComponent("next rocket launch");
+          el.innerHTML = `No upcoming launches in the free feed. <a href="https://duckduckgo.com/?q=${q}" target="_blank" rel="noopener">Search manually</a>`;
+          return;
+        }
+        const launch = launches[0];
+        const name = launch.name || "Unnamed mission";
+        const provider = (launch.provider && launch.provider.name) || "Unknown provider";
+        const pad = (launch.pad && (launch.pad.location && launch.pad.location.name)) ||
+                    (launch.pad && launch.pad.name) || "Unknown pad";
+        const time = launch.win_open
+          ? new Date(launch.win_open).toLocaleString()
+          : "TBD";
+
+        const query = encodeURIComponent(`${name} site:rocketlaunch.live`);
+        const url = `https://duckduckgo.com/?q=${query}`;
+
+        el.innerHTML = `${name} (${provider}) from ${pad}, planned for ${time}. ` +
+                       `<a href="${url}" target="_blank" rel="noopener">More info</a>`;
+      } catch (err) {
+        console.error(err);
+        const q = encodeURIComponent("next rocket launch");
+        el.innerHTML = `Could not fetch rocket launch data. <a href="https://duckduckgo.com/?q=${q}" target="_blank" rel="noopener">Search manually</a>`;
+      }
+    }
+
+    loadNextRocket();
+
+    // ---- WIKIPEDIA TOP PAGE ----------------------------------------------
+
+    async function loadWikiTop() {
+      const el = document.getElementById("wiki-text");
+      if (!el) return;
+      try {
+        const now = new Date();
+        now.setDate(now.getDate() - 1); // yesterday
+        const y = now.getFullYear();
+        const m = String(now.getMonth() + 1).padStart(2, "0");
+        const d = String(now.getDate()).padStart(2, "0");
+
+        const url =
+          `https://wikimedia.org/api/rest_v1/metrics/pageviews/top/en.wikipedia/all-access/${y}/${m}/${d}`;
+        const resp = await fetch(url);
+        if (!resp.ok) throw new Error("Wikipedia error");
+        const data = await resp.json();
+        const items = data.items?.[0]?.articles || [];
+
+        const ignore = new Set(["Main_Page", "Special:Search"]);
+        const top = items.find(a => !ignore.has(a.article));
+
+        if (!top) {
+          el.textContent = "No usable pageview data for yesterday.";
+          return;
+        }
+
+        const title = decodeURIComponent(top.article.replace(/_/g, " "));
+        el.innerHTML =
+          `Yesterday’s most viewed article was ` +
+          `<a href="https://en.wikipedia.org/wiki/${encodeURIComponent(top.article)}" ` +
+          `target="_blank" rel="noopener">${title}</a> ` +
+          `with ${top.views.toLocaleString()} views.`;
+      } catch (err) {
+        console.error(err);
+        el.textContent = "Could not fetch Wikipedia pageview data.";
+      }
+    }
+
+    loadWikiTop();
+
+    // ---- RANDOM POKÉMON --------------------------------------------------
+
+    async function loadRandomPokemon() {
+      const img = document.getElementById("pokemon-runner");
+      if (!img) return;
+
+      try {
+        const maxId = 898;
+        const id = Math.floor(Math.random() * maxId) + 1;
+        const resp = await fetch(`https://pokeapi.co/api/v2/pokemon/${id}`);
+        if (!resp.ok) throw new Error("PokeAPI error: " + resp.status);
+        const data = await resp.json();
+
+        const sprite =
+          data.sprites?.other?.["official-artwork"]?.front_default ||
+          data.sprites?.front_default;
+
+        if (sprite) {
+          img.src = sprite;
+          img.style.display = "block";
+        } else {
+          console.warn("No sprite, using fallback (charles.png)");
+          img.src = "../images/charles.png";
+          img.style.display = "block";
+        }
+      } catch (err) {
+        console.error("Pokemon error:", err);
+        const img = document.getElementById("pokemon-runner");
+        if (img) {
+          // Local fallback that definitely exists
+          img.src = "../images/charles.png";
+          img.style.display = "block";
+        }
+      }
+    }
+
+    loadRandomPokemon();
+
+    // ---- POKÉMON MOVEMENT (BOUNCE IN HEADER, INCLUDING CURSOR) ------------
+
+    function initPokemonRunner() {
+      const img = document.getElementById("pokemon-runner");
+      const header = document.querySelector("header");
+      if (!img || !header) return;
+
+      let x = 40;
+      let y = 10;
+      let vx = 3.5;
+      let vy = 2.8;
+
+      let cursorX = 0;
+      let cursorY = 0;
+      let cursorInside = false;
+
+      header.addEventListener("mousemove", (e) => {
+        const rect = header.getBoundingClientRect();
+        cursorX = e.clientX - rect.left;
+        cursorY = e.clientY - rect.top;
+        cursorInside = true;
+      });
+
+      header.addEventListener("mouseleave", () => {
+        cursorInside = false;
+      });
+
+      function tick() {
+        const spriteWidth = img.offsetWidth || 64;
+        const spriteHeight = img.offsetHeight || 64;
+        const maxX = Math.max(0, header.clientWidth  - spriteWidth);
+        const maxY = Math.max(0, header.clientHeight - spriteHeight);
+
+        x += vx;
+        y += vy;
+
+        if (x <= 0) {
+          x = 0;
+          vx *= -1;
+        } else if (x >= maxX) {
+          x = maxX;
+          vx *= -1;
+        }
+
+        if (y <= 0) {
+          y = 0;
+          vy *= -1;
+        } else if (y >= maxY) {
+          y = maxY;
+          vy *= -1;
+        }
+
+        if (cursorInside) {
+          const centerX = x + spriteWidth / 2;
+          const centerY = y + spriteHeight / 2;
+          const dx = centerX - cursorX;
+          const dy = centerY - cursorY;
+          const dist = Math.hypot(dx, dy);
+          const minDist = 50;
+
+          if (dist < minDist && dist > 0) {
+            const signX = centerX < cursorX ? -1 : 1;
+            const signY = centerY < cursorY ? -1 : 1;
+
+            vx = Math.abs(vx) * signX;
+            vy = Math.abs(vy) * signY;
+
+            x += signX * 8;
+            y += signY * 8;
+          }
+        }
+
+        img.style.transform = `translate(${x}px, ${y}px)`;
+        requestAnimationFrame(tick);
+      }
+
+      requestAnimationFrame(tick);
+    }
+
+    // ---- D20 FLOATERS (FASTER, SPIN, AVOID CURSOR) ------------------------
+
+    function initD20Floaters() {
+      const nodes = Array.from(document.querySelectorAll(".d20-floater"));
+      if (!nodes.length) return;
+
+      const floaters = nodes.map(el => {
+        return {
+          el,
+          x: Math.random() * window.innerWidth,
+          y: Math.random() * window.innerHeight,
+          vx: (Math.random() * 2 + 1) * (Math.random() < 0.5 ? -1 : 1),
+          vy: (Math.random() * 2 + 1) * (Math.random() < 0.5 ? -1 : 1),
+          angle: Math.random() * 360,
+          spin: (Math.random() * 2 + 1) * (Math.random() < 0.5 ? -1 : 1)
+        };
+      });
+
+      let cursorX = window.innerWidth / 2;
+      let cursorY = window.innerHeight / 2;
+
+      document.addEventListener("mousemove", (e) => {
+        cursorX = e.clientX;
+        cursorY = e.clientY;
+      });
+
+      function tick() {
+        const w = window.innerWidth;
+        const h = window.innerHeight;
+
+        for (const f of floaters) {
+          const fw = f.el.offsetWidth || 80;
+          const fh = f.el.offsetHeight || 80;
+
+          f.x += f.vx;
+          f.y += f.vy;
+
+          if (f.x <= 0) {
+            f.x = 0;
+            f.vx = Math.abs(f.vx);
+          } else if (f.x + fw >= w) {
+            f.x = w - fw;
+            f.vx = -Math.abs(f.vx);
+          }
+
+          if (f.y <= 0) {
+            f.y = 0;
+            f.vy = Math.abs(f.vy);
+          } else if (f.y + fh >= h) {
+            f.y = h - fh;
+            f.vy = -Math.abs(f.vy);
+          }
+
+          const centerX = f.x + fw / 2;
+          const centerY = f.y + fh / 2;
+          const dx = centerX - cursorX;
+          const dy = centerY - cursorY;
+          const dist = Math.hypot(dx, dy);
+
+          const avoidRadius = 120;
+          if (dist > 0 && dist < avoidRadius) {
+            const factor = 0.4;
+            f.vx += (dx / dist) * factor;
+            f.vy += (dy / dist) * factor;
+          }
+
+          const maxSpeed = 6;
+          const speed = Math.hypot(f.vx, f.vy);
+          if (speed > maxSpeed) {
+            const scale = maxSpeed / speed;
+            f.vx *= scale;
+            f.vy *= scale;
+          }
+
+          f.angle += f.spin;
+
+          f.el.style.transform =
+            `translate(${f.x}px, ${f.y}px) rotate(${f.angle}deg)`;
+        }
+
+        requestAnimationFrame(tick);
+      }
+
+      requestAnimationFrame(tick);
+    }
+
+    // ---- ROUVGIES MAP ----------------------------------------------------
+
+    let rougvieMap = null;
+
+    function initRougviesMap() {
+      const mapDiv = document.getElementById("rougvies-map");
+      if (!mapDiv) return;
+
+      if (typeof L === "undefined") {
+        console.error("Leaflet L is undefined. Map script may not have loaded.");
+        mapDiv.innerHTML = "<p style='font-size:0.85rem;'>Map could not load. If this keeps happening, check Leaflet CDN access.</p>";
+        return;
+      }
+
+      rougvieMap = L.map("rougvies-map").setView([20, 0], 2);
+
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        maxZoom: 5,
+        attribution: "&copy; OpenStreetMap"
+      }).addTo(rougvieMap);
+
+      loadRougvies();
+    }
+
+    async function loadRougvies() {
+      const countEl = document.getElementById("rougvie-count");
+      if (!rougvieMap) return;
+      try {
+        const resp = await fetch(ROUVIES_ENDPOINT);
+        const data = await resp.json();
+        if (!Array.isArray(data)) return;
+
+        if (countEl) countEl.textContent = data.length;
+
+        data.forEach(row => {
+          const lat = Number(row.lat);
+          const lon = Number(row.lon);
+          if (!isFinite(lat) || !isFinite(lon)) return;
+          const name = row.name || "Rougvie";
+          const city = row.city || "";
+          const label = city ? `${name} (${city})` : name;
+          L.circleMarker([lat, lon], {
+            radius: 5,
+            color: "#ffcc00",
+            fillColor: "#ff88ff",
+            fillOpacity: 0.9
+          }).addTo(rougvieMap).bindPopup(label);
+        });
+      } catch (err) {
+        console.error("Rougvies load error", err);
+      }
+    }
+
+    async function addRougvie() {
+      const name = prompt("First name (optional, can be a nickname):", "");
+      const city = prompt("City you want to show on the map:", "") || "";
+
+      const payload = {
+        name: name || "Rougvie",
+        city: city,
+        lat: lastLat,
+        lon: lastLon
+      };
+
+      try {
+        await fetch(ROUVIES_ENDPOINT, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+        alert("Rougvie check-in sent. Reloading markers.");
+        loadRougvies();
+      } catch (err) {
+        console.error("Rougvie add error", err);
+        alert("Could not add you to the map. Blame the goblins in the wires.");
+      }
+    }
+
+    document.getElementById("rougvie-add-btn")?.addEventListener("click", addRougvie);
+
+    // ---- GUESTBOOK -------------------------------------------------------
+
+    async function loadGuestbook() {
+      const listEl = document.getElementById("guestbook-entries");
+      if (!listEl) return;
+      try {
+        const resp = await fetch(GUESTBOOK_ENDPOINT);
+        const data = await resp.json();
+        if (!Array.isArray(data) || !data.length) {
+          listEl.textContent = "No entries yet. Be the first scribble.";
+          return;
+        }
+        listEl.innerHTML = "";
+        data.slice().reverse().forEach(row => {
+          const div = document.createElement("div");
+          div.className = "guestbook-entry";
+          const name = row.name || "Anonymous";
+          const city = row.city || "";
+          const msg = row.message || "";
+          const stamp = row.timestamp || "";
+          div.innerHTML =
+            `<strong>${name}</strong>` +
+            (city ? ` &mdash; ${city}` : "") +
+            (stamp ? ` <span style="font-size:0.8rem; opacity:0.7;">| ${stamp}</span>` : "") +
+            `<div>${msg}</div>`;
+          listEl.appendChild(div);
+        });
+      } catch (err) {
+        console.error("Guestbook load error", err);
+        listEl.textContent = "Could not load guestbook entries.";
+      }
+    }
+
+    async function submitGuestbook() {
+      const nameEl = document.getElementById("gb-name");
+      const cityEl = document.getElementById("gb-city");
+      const msgEl = document.getElementById("gb-message");
+      const message = msgEl.value.trim();
+      if (!message) {
+        alert("Please write a message before signing.");
+        return;
+      }
+      const payload = {
+        name: nameEl.value.trim() || "Anonymous",
+        city: cityEl.value.trim(),
+        message
+      };
+      try {
+        await fetch(GUESTBOOK_ENDPOINT, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+        msgEl.value = "";
+        alert("Guestbook signed. Thanks!");
+        loadGuestbook();
+      } catch (err) {
+        console.error("Guestbook submit error", err);
+        alert("Could not sign the guestbook right now.");
+      }
+    }
+
+    document.getElementById("gb-submit-btn")?.addEventListener("click", submitGuestbook);
+
+    // ---- FOOTER YEAR ------------------------------------------------------
+
+    document.getElementById("year").textContent = new Date().getFullYear();
+
+    // ---- CURSOR TRAIL -----------------------------------------------------
+
+    (function () {
+      const maxDots = 80;
+      const dots = [];
+      let lastTime = 0;
+
+      document.addEventListener("mousemove", (e) => {
+        const now = performance.now();
+        if (now - lastTime < 15) return;
+        lastTime = now;
+
+        const dot = document.createElement("div");
+        dot.className = "cursor-trail-dot";
+
+        if (e.target && e.target.closest("a, button")) {
+          dot.classList.add("link");
+        }
+
+        dot.style.left = e.clientX + "px";
+        dot.style.top = e.clientY + "px";
+
+        document.body.appendChild(dot);
+        dots.push(dot);
+
+        setTimeout(() => {
+          if (dot.parentNode) dot.parentNode.removeChild(dot);
+        }, 500);
+
+        if (dots.length > maxDots) {
+          const old = dots.shift();
+          if (old && old.parentNode) old.parentNode.removeChild(old);
+        }
+      });
+    })();
+
+    // ---- INITIALISE MAP, GUESTBOOK, POKÉMON, D20s AFTER LOAD --------------
+
+    window.addEventListener("load", () => {
+      initRougviesMap();
+      loadGuestbook();
+      initPokemonRunner();
+      initD20Floaters();
+    });
+  </script>
+</body>
+</html>
+
+
