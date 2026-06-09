@@ -1,12 +1,12 @@
 /* rougvie.com — landing interactions
    - scroll reveals
-   - "The Cartographer's Door": a 4-stage hidden-door puzzle to /classic/
+   - "The Cartographer's Door": a 4-stage hidden-door puzzle to /retro/
      (replaces the old footer-d20 click + Konami shortcut — that route is gone)
 */
 (function () {
   "use strict";
 
-  var DEST = "/classic/";
+  var DEST = "/retro/";
   var reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   /* ---------- footer year ---------- */
@@ -35,7 +35,7 @@
      Stage 1  acrostic: razor surnames Hanlon/Occam/Newton/Einstein → HONE
      Stage 2  cipher: Caesar +4, "WLEVTIR..." → "SHARPEN THE BLADE ROLL ONE"
      Stage 3  dice: four hidden stones sum to 21 (5+6+4+6)
-     Stage 4  unlock: type HONE + roll (nat 20) → reveals /classic/ link
+     Stage 4  unlock: type HONE + roll (nat 20) → reveals /retro/ link
      ========================================================= */
 
   var WATCHWORD = "hone";
