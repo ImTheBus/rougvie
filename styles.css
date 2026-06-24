@@ -620,6 +620,23 @@ em { font-style: italic; color: var(--rust-deep); }
 .phil-summary:hover { color: var(--ink); }
 .phil-detail-body { margin-top: 1.5rem; }
 
+/* Photography collapsible */
+.photo-collapsible {
+  display: flex !important;
+  flex-direction: column;
+  padding: 0 !important;
+}
+.photo-summary {
+  cursor: pointer;
+  list-style: none;
+  padding: 0;
+  position: relative;
+}
+.photo-summary::-webkit-details-marker { display: none; }
+.photo-detail {
+  padding-top: 1.5rem;
+}
+
 /* ====================== SCROLL REVEAL (slow, weather-like) ====================== */
 .reveal {
   opacity: 0; transform: translateY(18px);
